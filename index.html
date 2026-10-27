@@ -940,6 +940,7 @@ function startLevel() {
 
 function found() {
   game.state = "found"; $("hintBtn").disabled = true;
+  game.elapsed = (performance.now() - game.t0) / 1000 + game.penalty;
   focusOn(game.hero.x, game.hero.y - 30 * game.hero.s);
   game.total += game.elapsed;
   const lv = LEVELS[game.level];
