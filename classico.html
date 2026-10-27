@@ -91,17 +91,30 @@ h1 .mark { background: linear-gradient(transparent 52%, var(--hi) 52%, var(--hi)
 .hud .btn.small { background: var(--paper); color: var(--ink); border-color: var(--paper); box-shadow: none; }
 .clues { display: flex; flex-wrap: wrap; gap: 8px; background: var(--hi); border: 3px solid var(--ink); border-bottom: 0; padding: 8px 14px; font-size: 14px; font-weight: 600; align-items: center; }
 .clues .chip { background: var(--card); border: 2px solid var(--ink); border-radius: 999px; padding: 2px 10px; font-size: 13px; }
-.stage-scroll { overflow-x: auto; border: 3px solid var(--ink); background: var(--ink); box-shadow: 8px 8px 0 var(--ink); }
-.stage { position: relative; min-width: 900px; }
+.stage-scroll { border: 3px solid var(--ink); background: var(--ink); box-shadow: 8px 8px 0 var(--ink); }
+.stage { position: relative; overflow: hidden; }
+.pan { transform-origin: 0 0; }
 .stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 720; cursor: crosshair; }
-.overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(20, 33, 61, .55); padding: 20px; }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(20, 33, 61, .55); padding: 16px; overflow: auto; z-index: 3; }
+.zoom { position: absolute; right: 10px; bottom: 10px; display: none; flex-direction: column; gap: 6px; z-index: 2; }
+.zoom button { width: 42px; height: 42px; font-family: var(--f-display); font-size: 20px; line-height: 1; border: 2px solid var(--ink); border-radius: 50%; background: var(--card); color: var(--ink); cursor: pointer; box-shadow: 2px 2px 0 var(--ink); }
 .panel { background: var(--card); border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); padding: 26px 28px; max-width: 460px; text-align: center; }
 .panel .eyebrow { color: var(--stamp); }
 .panel h3 { font-family: var(--f-display); font-weight: 400; font-size: 30px; margin: 8px 0 10px; line-height: 1.05; text-wrap: balance; }
 .panel p { margin: 0 0 18px; }
 .panel .btn + .btn { margin-left: 8px; }
 .scroll-hint { display: none; font-family: var(--f-mono); font-size: 12px; color: var(--ink-soft); margin-top: 14px; }
-@media (max-width: 940px) { .scroll-hint { display: block; } }
+@media (max-width: 760px) {
+  .scroll-hint { display: block; }
+  .stage { height: min(74vh, 560px); touch-action: none; }
+  .stage-scroll { box-shadow: 4px 4px 0 var(--ink); }
+  .zoom { display: flex; }
+  .hud .place { width: 100%; }
+  .panel { padding: 18px; }
+  .panel h3 { font-size: 24px; }
+  .panel p { font-size: 15px; }
+  .clues { font-size: 13px; }
+}
 
 /* results */
 .results { margin-top: 28px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; background: var(--card); border: 3px solid var(--ink); padding: 22px; box-shadow: 8px 8px 0 var(--ink); }
@@ -196,14 +209,18 @@ footer .disc { border-top: 3px solid var(--ink); padding-top: 16px; max-width: 7
       <span class="chip">🧳 mala marrom</span>
     </div>
     <div class="stage-scroll">
-      <div class="stage">
-        <canvas id="scene" width="1200" height="720" aria-label="Cena ilustrada com uma multidão onde o Flávio está escondido"></canvas>
+      <div class="stage" id="stage">
+        <div class="pan" id="pan"><canvas id="scene" width="1200" height="720" aria-label="Cena ilustrada com uma multidão onde o Flávio está escondido"></canvas></div>
+        <div class="zoom">
+          <button type="button" id="zoomIn" aria-label="Aproximar a cena">+</button>
+          <button type="button" id="zoomOut" aria-label="Afastar a cena">−</button>
+        </div>
         <div class="overlay" id="overlay">
           <div class="panel" id="panel"></div>
         </div>
       </div>
     </div>
-    <p class="scroll-hint">Arraste a cena para os lados para ver tudo.</p>
+    <p class="scroll-hint">Arraste para explorar e use + e − ou o gesto de pinça para dar zoom.</p>
 
     <div class="results" id="results" hidden>
       <div class="big-q">?</div>
@@ -633,10 +650,12 @@ function showIntro() {
 function startLevel() {
   hidePanel(); game.state = "play"; game.t0 = performance.now(); game.penalty = 0; game.elapsed = 0;
   game.marks = []; game.hint = null; $("hintBtn").disabled = false;
+  fitView(true);
 }
 
 function found() {
   game.state = "found"; $("hintBtn").disabled = true;
+  focusOn(game.hero.x, game.hero.y - 30 * game.hero.s);
   game.total += game.elapsed;
   const lv = LEVELS[game.level];
   const t = game.elapsed.toFixed(1).replace(".", ",");
@@ -675,7 +694,69 @@ function finish() {
   $("results").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
+/* ---------- câmera do celular: arrastar e dar zoom na cena ---------- */
+const stage = $("stage"), pan = $("pan");
+const view = { on: false, z: 1, x: 0, y: 0, min: 1, max: 1, moved: 0, dragged: false };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const narrow = matchMedia("(max-width: 760px)");
+function applyView() {
+  if (!view.on) { pan.style.transform = ""; return; }
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const cw = w * view.z, ch = w * H / W * view.z;
+  view.x = clamp(view.x, Math.min(0, w - cw), 0);
+  view.y = clamp(view.y, Math.min(0, h - ch), 0);
+  pan.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.z})`;
+}
+function fitView(reset) {
+  view.on = narrow.matches;
+  if (!view.on) { applyView(); return; }
+  const w = stage.clientWidth, h = stage.clientHeight;
+  view.min = Math.max(1, h / (w * H / W)); view.max = view.min * 2.4;
+  if (reset) { view.z = view.min; view.x = (w - w * view.z) / 2; view.y = 0; }
+  view.z = clamp(view.z, view.min, view.max);
+  applyView();
+}
+function zoomAt(f, px, py) {
+  const nz = clamp(view.z * f, view.min, view.max), k = nz / view.z;
+  view.x = px - (px - view.x) * k; view.y = py - (py - view.y) * k; view.z = nz; applyView();
+}
+function focusOn(lx, ly) { // centraliza um ponto da cena (coordenadas 1200×720)
+  if (!view.on) return;
+  const w = stage.clientWidth, h = stage.clientHeight, s = w * view.z / W;
+  view.x = w / 2 - lx * s; view.y = h / 2 - ly * s; applyView();
+}
+const touches = new Map(); let pinch = null;
+stage.addEventListener("pointerdown", (e) => {
+  if (!view.on || e.target.closest(".overlay, .zoom")) return;
+  touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (touches.size === 1) { view.moved = 0; view.dragged = false; }
+  pinch = null;
+});
+stage.addEventListener("pointermove", (e) => {
+  if (!touches.has(e.pointerId)) return;
+  const prev = touches.get(e.pointerId);
+  touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (touches.size === 1) {
+    const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+    view.x += dx; view.y += dy; view.moved += Math.abs(dx) + Math.abs(dy);
+    if (view.moved > 8) view.dragged = true;
+    applyView();
+  } else if (touches.size === 2) {
+    const [a, b] = [...touches.values()], r = stage.getBoundingClientRect();
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (pinch) zoomAt(d / pinch, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+    pinch = d; view.dragged = true;
+  }
+});
+const lift = (e) => { touches.delete(e.pointerId); if (touches.size < 2) pinch = null; };
+["pointerup", "pointercancel", "pointerleave"].forEach((t) => stage.addEventListener(t, lift));
+$("zoomIn").addEventListener("click", () => zoomAt(1.4, stage.clientWidth / 2, stage.clientHeight / 2));
+$("zoomOut").addEventListener("click", () => zoomAt(1 / 1.4, stage.clientWidth / 2, stage.clientHeight / 2));
+addEventListener("resize", () => fitView(false));
+narrow.addEventListener("change", () => fitView(true));
+
 scene.addEventListener("click", (e) => {
+  if (view.dragged) { view.dragged = false; return; }
   if (!game || game.state !== "play") return;
   const r = scene.getBoundingClientRect();
   const x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
@@ -691,6 +772,7 @@ $("hintBtn").addEventListener("click", () => {
   game.penalty += 10; game.hints++;
   const h = game.hero;
   game.hint = { x: h.x + between(-80, 80), y: h.y - 30 + between(-70, 70), until: performance.now() + 3500 };
+  focusOn(game.hint.x, game.hint.y);
 });
 
 $("heroStart").addEventListener("click", () => { if (game && game.state === "intro") setTimeout(() => $("goBtn") && $("goBtn").focus(), 400); });
@@ -728,6 +810,6 @@ setInterval(() => {
 }, 1000);
 
 (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
-  drawPoster(); newGame(); requestAnimationFrame(loop);
+  drawPoster(); newGame(); fitView(true); requestAnimationFrame(loop);
 });
 </script>
