@@ -37,6 +37,7 @@ a { color: var(--ink); }
 .mast { border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); text-align: center; padding-block: 14px 10px; }
 .mast h1 { font-family: var(--f-mast); font-weight: 400; font-size: clamp(46px, 9vw, 108px); line-height: 1; margin: 0; }
 .mast h1 em { font-style: normal; color: var(--red); }
+.mast-sub { font-family: var(--f-body); font-style: italic; font-size: 17px; color: var(--ink-soft); margin: 4px 0 0; }
 .byline { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 20px; border-bottom: 1.5px solid var(--ink); padding-block: 8px; font-family: var(--f-head); font-weight: 500; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
 
 .headline { text-align: center; padding-block: 34px 10px; }
@@ -90,10 +91,14 @@ a { color: var(--ink); }
 .clues .d { display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .clues canvas { width: 40px; height: 43px; background: var(--photo); display: block; }
 .clues .chip { border: 1.5px solid var(--ink); padding: 0 8px; font-size: 14px; }
-.stage-scroll { overflow-x: auto; border: 1.5px solid var(--ink); background: var(--ink); }
-.stage { position: relative; min-width: 900px; }
+.stage-scroll { border: 1.5px solid var(--ink); background: var(--ink); }
+.stage { position: relative; overflow: hidden; }
+.pan { transform-origin: 0 0; }
 .stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 720; cursor: crosshair; filter: saturate(.85) contrast(1.02); }
-.overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(20, 20, 20, .5); padding: 20px; }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(20, 20, 20, .5); padding: 16px; overflow: auto; z-index: 3; }
+.zoom { position: absolute; right: 10px; bottom: 10px; display: none; flex-direction: column; gap: 6px; z-index: 2; }
+.zoom button { width: 42px; height: 42px; font-family: var(--f-head); font-size: 22px; line-height: 1; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.only-mobile { display: none; }
 .panel { background: var(--paper); border: 2px solid var(--ink); padding: 22px 26px; max-width: 470px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
 .panel h4 { font-family: var(--f-head); font-weight: 700; font-size: 30px; text-transform: uppercase; line-height: 1.05; margin: 6px 0 10px; text-wrap: balance; }
 .panel p { margin: 0 0 16px; }
@@ -130,6 +135,17 @@ footer p { max-width: 72ch; margin: 0; }
   .boletim div:nth-child(n+3) { border-top: 1px solid var(--rule); }
   .results { grid-template-columns: 1fr; }
 }
+@media (max-width: 760px) {
+  .stage { height: min(74vh, 560px); touch-action: none; }
+  .zoom { display: flex; }
+  .only-mobile { display: inline; }
+  .hud .place { width: 100%; }
+  .panel { padding: 16px 18px; }
+  .panel h4 { font-size: 24px; }
+  .panel canvas { width: 80px; height: 86px; }
+  .panel p { font-size: 15px; }
+  .top { font-size: 13px; }
+}
 @media (prefers-reduced-motion: reduce) { .card canvas, .btn { transition: none; } }
 </style>
 
@@ -140,6 +156,7 @@ footer p { max-width: 72ch; margin: 0; }
   </div>
   <header class="mast">
     <h1>Gazeta do <em>Paradeiro</em></h1>
+    <p class="mast-sub">Inspirada na Revista Piauí.</p>
   </header>
   <div class="byline">
     <span>Reportagem: equipe de buscas</span>
@@ -190,12 +207,16 @@ footer p { max-width: 72ch; margin: 0; }
       <span class="chip">mala marrom</span>
     </div>
     <div class="stage-scroll">
-      <div class="stage">
-        <canvas id="scene" width="1200" height="720" aria-label="Cena ilustrada com uma multidão onde o Flávio está disfarçado"></canvas>
+      <div class="stage" id="stage">
+        <div class="pan" id="pan"><canvas id="scene" width="1200" height="720" aria-label="Cena ilustrada com uma multidão onde o Flávio está disfarçado"></canvas></div>
+        <div class="zoom">
+          <button type="button" id="zoomIn" aria-label="Aproximar a cena">+</button>
+          <button type="button" id="zoomOut" aria-label="Afastar a cena">−</button>
+        </div>
         <div class="overlay" id="overlay"><div class="panel" id="panel"></div></div>
       </div>
     </div>
-    <p class="legenda" id="legenda">Foto: leitor anônimo. Em telas pequenas, arraste a cena para os lados.</p>
+    <p class="legenda" id="legenda">Foto: leitor anônimo. <span class="only-mobile">Arraste para explorar e use + e − ou o gesto de pinça para dar zoom.</span></p>
 
     <div class="results" id="results" hidden>
       <div>
@@ -916,10 +937,13 @@ function showIntro() {
 function startLevel() {
   hidePanel(); game.state = "play"; game.t0 = performance.now(); game.penalty = 0; game.elapsed = 0;
   game.marks = []; game.hint = null; $("hintBtn").disabled = false;
+  fitView(true);
 }
 
 function found() {
   game.state = "found"; $("hintBtn").disabled = true;
+  game.elapsed = (performance.now() - game.t0) / 1000 + game.penalty;
+  focusOn(game.hero.x, game.hero.y - 30 * game.hero.s);
   game.total += game.elapsed;
   const lv = LEVELS[game.level];
   const t = game.elapsed.toFixed(1).replace(".", ",");
@@ -959,7 +983,69 @@ function finish() {
   $("results").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
+/* ---------- câmera do celular: arrastar e dar zoom na cena ---------- */
+const stage = $("stage"), pan = $("pan");
+const view = { on: false, z: 1, x: 0, y: 0, min: 1, max: 1, moved: 0, dragged: false };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const narrow = matchMedia("(max-width: 760px)");
+function applyView() {
+  if (!view.on) { pan.style.transform = ""; return; }
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const cw = w * view.z, ch = w * H / W * view.z;
+  view.x = clamp(view.x, Math.min(0, w - cw), 0);
+  view.y = clamp(view.y, Math.min(0, h - ch), 0);
+  pan.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.z})`;
+}
+function fitView(reset) {
+  view.on = narrow.matches;
+  if (!view.on) { applyView(); return; }
+  const w = stage.clientWidth, h = stage.clientHeight;
+  view.min = Math.max(1, h / (w * H / W)); view.max = view.min * 2.4;
+  if (reset) { view.z = view.min; view.x = (w - w * view.z) / 2; view.y = 0; }
+  view.z = clamp(view.z, view.min, view.max);
+  applyView();
+}
+function zoomAt(f, px, py) {
+  const nz = clamp(view.z * f, view.min, view.max), k = nz / view.z;
+  view.x = px - (px - view.x) * k; view.y = py - (py - view.y) * k; view.z = nz; applyView();
+}
+function focusOn(lx, ly) { // centraliza um ponto da cena (coordenadas 1200×720)
+  if (!view.on) return;
+  const w = stage.clientWidth, h = stage.clientHeight, s = w * view.z / W;
+  view.x = w / 2 - lx * s; view.y = h / 2 - ly * s; applyView();
+}
+const touches = new Map(); let pinch = null;
+stage.addEventListener("pointerdown", (e) => {
+  if (!view.on || e.target.closest(".overlay, .zoom")) return;
+  touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (touches.size === 1) { view.moved = 0; view.dragged = false; }
+  pinch = null;
+});
+stage.addEventListener("pointermove", (e) => {
+  if (!touches.has(e.pointerId)) return;
+  const prev = touches.get(e.pointerId);
+  touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (touches.size === 1) {
+    const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+    view.x += dx; view.y += dy; view.moved += Math.abs(dx) + Math.abs(dy);
+    if (view.moved > 8) view.dragged = true;
+    applyView();
+  } else if (touches.size === 2) {
+    const [a, b] = [...touches.values()], r = stage.getBoundingClientRect();
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (pinch) zoomAt(d / pinch, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+    pinch = d; view.dragged = true;
+  }
+});
+const lift = (e) => { touches.delete(e.pointerId); if (touches.size < 2) pinch = null; };
+["pointerup", "pointercancel", "pointerleave"].forEach((t) => stage.addEventListener(t, lift));
+$("zoomIn").addEventListener("click", () => zoomAt(1.4, stage.clientWidth / 2, stage.clientHeight / 2));
+$("zoomOut").addEventListener("click", () => zoomAt(1 / 1.4, stage.clientWidth / 2, stage.clientHeight / 2));
+addEventListener("resize", () => fitView(false));
+narrow.addEventListener("change", () => fitView(true));
+
 scene.addEventListener("click", (e) => {
+  if (view.dragged) { view.dragged = false; return; }
   if (!game || game.state !== "play") return;
   const r = scene.getBoundingClientRect();
   const x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
@@ -974,6 +1060,7 @@ $("hintBtn").addEventListener("click", () => {
   game.penalty += 10; game.hints++;
   const h = game.hero;
   game.hint = { x: h.x + between(-80, 80), y: h.y - 30 + between(-70, 70), until: performance.now() + 3500 };
+  focusOn(game.hint.x, game.hint.y);
 });
 $("againBtn").addEventListener("click", () => { newGame(); $("caderno").scrollIntoView({ behavior: "smooth" }); });
 $("copyBtn").addEventListener("click", () => {
@@ -988,6 +1075,6 @@ let toastTimer;
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2200); }
 
 (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
-  newGame(); drawMural(); requestAnimationFrame(loop);
+  newGame(); drawMural(); fitView(true); requestAnimationFrame(loop);
 });
 </script>
