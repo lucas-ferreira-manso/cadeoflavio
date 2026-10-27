@@ -1,0 +1,988 @@
+<title>Gazeta do Paradeiro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Oswald:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: primeira página de jornal satírico — cabeçalho gótico, manchete condensada, mural 5×3 de disfarces e o passatempo "Caça-Flávio" como caderno interno */
+:root {
+  --paper: #ebe6d9;
+  --paper-2: #f3efe4;
+  --ink: #141414;
+  --ink-soft: #55524a;
+  --rule: #9d978a;
+  --red: #c8102e;
+  --photo: #b8b4aa;
+  --hi: #ffd23f;
+  --f-mast: "UnifrakturMaguntia", "Old English Text MT", Georgia, serif;
+  --f-head: "Oswald", "Arial Narrow", Impact, sans-serif;
+  --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.55; }
+a { color: var(--ink); }
+:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* cabeçalho */
+.top { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 22px 10px; font-family: var(--f-head); font-weight: 600; font-size: 15px; }
+.top .extra { background: var(--red); color: #fff; padding: 1px 10px; letter-spacing: .1em; }
+.mast { border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); text-align: center; padding-block: 14px 10px; }
+.mast h1 { font-family: var(--f-mast); font-weight: 400; font-size: clamp(46px, 9vw, 108px); line-height: 1; margin: 0; }
+.mast h1 em { font-style: normal; color: var(--red); }
+.byline { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 20px; border-bottom: 1.5px solid var(--ink); padding-block: 8px; font-family: var(--f-head); font-weight: 500; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+
+.headline { text-align: center; padding-block: 34px 10px; }
+.headline h2 { font-family: var(--f-head); font-weight: 700; font-size: clamp(30px, 5vw, 54px); line-height: 1.08; text-transform: uppercase; margin: 0 auto; max-width: 20ch; text-wrap: balance; }
+.deck { font-style: italic; font-size: 19px; max-width: 46ch; margin: 16px auto 0; color: var(--ink-soft); text-wrap: balance; }
+.boletim { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); margin-top: 28px; }
+.boletim div { padding: 10px 14px; border-left: 1px solid var(--rule); }
+.boletim div:first-child { border-left: 0; }
+.boletim span { display: block; font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.boletim b { font-family: var(--f-head); font-weight: 600; font-size: 19px; text-transform: uppercase; }
+
+/* mural */
+.mural-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; margin: 30px 0 12px; }
+.kicker { font-family: var(--f-head); font-weight: 600; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--red); }
+.mural-head p { margin: 2px 0 0; font-size: 15px; color: var(--ink-soft); }
+.mural { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; background: var(--paper-2); padding: 4px; }
+.card { appearance: none; border: 0; padding: 0; background: var(--photo); cursor: pointer; position: relative; aspect-ratio: 1 / 1.08; overflow: hidden; font: inherit; color: inherit; text-align: left; }
+.card canvas { display: block; width: 100%; height: 100%; transition: transform .25s ease; }
+.card:hover canvas { transform: scale(1.04); }
+.card .cap { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, rgba(0,0,0,.72)); color: #fff; font-family: var(--f-head); font-weight: 500; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; padding: 22px 8px 7px; line-height: 1.15; }
+.card .num { position: absolute; top: 6px; left: 6px; font-family: var(--f-mono); font-size: 11px; font-weight: 700; background: var(--paper); padding: 0 5px; }
+.card .back { position: absolute; inset: 0; background: var(--paper-2); padding: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 1.35; }
+.card .back b { font-family: var(--f-head); font-size: 16px; text-transform: uppercase; line-height: 1.1; }
+.card .back .pct { font-family: var(--f-head); font-weight: 700; font-size: 34px; color: var(--red); line-height: 1; margin-top: auto; }
+.card .back small { font-family: var(--f-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.card.now::after { content: "NESTA FASE"; position: absolute; top: 6px; right: 6px; background: var(--red); color: #fff; font-family: var(--f-mono); font-size: 10px; font-weight: 700; padding: 1px 6px; }
+.photo-credit { font-family: var(--f-mono); font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
+
+.btn { font-family: var(--f-head); font-weight: 600; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); padding: 11px 22px; cursor: pointer; text-decoration: none; display: inline-block; transition: background .15s, color .15s; }
+.btn:hover { background: var(--red); border-color: var(--red); color: #fff; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { background: var(--ink); color: var(--paper); }
+.btn.small { font-size: 13px; padding: 6px 12px; }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+/* jogo */
+.caderno { margin-top: 54px; border-top: 6px double var(--ink); padding-top: 18px; }
+.caderno-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.caderno-head h3 { font-family: var(--f-head); font-weight: 700; font-size: clamp(30px, 4.4vw, 46px); text-transform: uppercase; line-height: 1; margin: 4px 0 0; }
+.levels { display: flex; gap: 6px; flex-wrap: wrap; }
+.lvl { font-family: var(--f-mono); font-size: 11px; font-weight: 700; padding: 4px 8px; border: 1.5px solid var(--ink); color: var(--ink-soft); }
+.lvl.on { background: var(--ink); color: var(--paper); }
+.lvl.done { background: var(--red); border-color: var(--red); color: #fff; }
+.hud { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; background: var(--ink); color: var(--paper); padding: 8px 12px; }
+.hud .place { font-family: var(--f-head); font-weight: 600; font-size: 17px; text-transform: uppercase; letter-spacing: .04em; margin-right: auto; }
+.hud .cell { font-family: var(--f-mono); font-size: 12px; }
+.hud .cell b { font-size: 17px; color: var(--hi); font-variant-numeric: tabular-nums; margin-left: 4px; }
+.hud .btn.small { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.clues { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--paper-2); border: 1.5px solid var(--ink); border-top: 0; border-bottom: 0; padding: 8px 12px; font-size: 15px; }
+.clues .lbl { font-family: var(--f-head); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: 13px; color: var(--red); }
+.clues .d { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.clues canvas { width: 40px; height: 43px; background: var(--photo); display: block; }
+.clues .chip { border: 1.5px solid var(--ink); padding: 0 8px; font-size: 14px; }
+.stage-scroll { overflow-x: auto; border: 1.5px solid var(--ink); background: var(--ink); }
+.stage { position: relative; min-width: 900px; }
+.stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 720; cursor: crosshair; filter: saturate(.85) contrast(1.02); }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(20, 20, 20, .5); padding: 20px; }
+.panel { background: var(--paper); border: 2px solid var(--ink); padding: 22px 26px; max-width: 470px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+.panel h4 { font-family: var(--f-head); font-weight: 700; font-size: 30px; text-transform: uppercase; line-height: 1.05; margin: 6px 0 10px; text-wrap: balance; }
+.panel p { margin: 0 0 16px; }
+.panel canvas { width: 110px; height: 119px; background: var(--photo); margin: 4px auto 12px; display: block; }
+.legenda { font-family: var(--f-mono); font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
+
+.results { margin-top: 22px; border: 1.5px solid var(--ink); background: var(--paper-2); padding: 20px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; }
+.results > * { min-width: 0; }
+.rank { font-family: var(--f-head); font-weight: 700; font-size: 28px; text-transform: uppercase; line-height: 1.05; margin: 4px 0 10px; }
+.scoreline { display: flex; gap: 20px; flex-wrap: wrap; font-family: var(--f-mono); font-size: 12px; color: var(--ink-soft); }
+.scoreline b { display: block; font-family: var(--f-head); font-size: 26px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.share { font-family: var(--f-mono); font-size: 13px; border: 1.5px dashed var(--rule); padding: 10px; margin: 14px 0 12px; user-select: all; }
+.results .row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* pistas */
+.pistas { margin-top: 54px; border-top: 6px double var(--ink); padding-top: 18px; }
+.pistas h3 { font-family: var(--f-head); font-weight: 700; font-size: clamp(28px, 4vw, 40px); text-transform: uppercase; margin: 4px 0 4px; line-height: 1; }
+.cols { columns: 3 260px; column-gap: 28px; column-rule: 1px solid var(--rule); margin-top: 18px; }
+.nota { break-inside: avoid; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--rule); }
+.nota .src { font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--red); font-weight: 700; }
+.nota h4 { font-family: var(--f-head); font-weight: 600; font-size: 21px; line-height: 1.15; margin: 4px 0 6px; text-transform: uppercase; }
+.nota p { margin: 0 0 6px; font-size: 15px; }
+.nota a { font-family: var(--f-mono); font-size: 12px; font-weight: 700; }
+
+footer { margin-top: 30px; border-top: 1.5px solid var(--ink); padding-block: 14px 44px; font-size: 14px; color: var(--ink-soft); }
+footer p { max-width: 72ch; margin: 0; }
+
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); font-family: var(--f-mono); font-size: 13px; padding: 10px 16px; }
+
+@media (max-width: 860px) {
+  .mural { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .boletim { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .boletim div:nth-child(3) { border-left: 0; }
+  .boletim div:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  .results { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .card canvas, .btn { transition: none; } }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <span>humor_paradeiro</span>
+    <span class="extra">EDIÇÃO EXTRA · TERÇA, 27 DE OUTUBRO DE 2026</span>
+  </div>
+  <header class="mast">
+    <h1>Gazeta do <em>Paradeiro</em></h1>
+  </header>
+  <div class="byline">
+    <span>Reportagem: equipe de buscas</span>
+    <span>Supervisão: aliados (que não sabem de nada)</span>
+  </div>
+
+  <section class="headline">
+    <h2>Fronteiras em alerta para possíveis disfarces de Flávio Bolsonaro</h2>
+    <p class="deck">Sem passaportes, sem registro de entrada na Argentina e sem paradeiro oficial, o senador pode estar em qualquer lugar. Inclusive de gorro andino.</p>
+    <div class="boletim" aria-label="Boletim do caso">
+      <div><span>Paradeiro oficial</span><b>Desconhecido</b></div>
+      <div><span>Passaportes</span><b>Cancelados</b></div>
+      <div><span>Jatinho</span><b>Parado em Iguazú*</b></div>
+      <div><span>Aliados</span><b>“Não saiu”</b></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="muralTitle">
+    <div class="mural-head">
+      <div>
+        <div class="kicker" id="muralTitle">Mural de suspeitos</div>
+        <p>Toque em um retrato para abrir a ficha. Um deles é o disfarce da fase atual do jogo.</p>
+      </div>
+      <a class="btn" href="#caderno">Caçar o Flávio ↓</a>
+    </div>
+    <div class="mural" id="mural"></div>
+    <p class="photo-credit">Ilustrações: Gazeta do Paradeiro. Retratos fictícios, feitos para fins humorísticos.</p>
+  </section>
+
+  <section class="caderno" id="caderno" aria-labelledby="gameTitle">
+    <div class="caderno-head">
+      <div>
+        <div class="kicker">Passatempo da edição</div>
+        <h3 id="gameTitle">Caça-Flávio</h3>
+      </div>
+      <div class="levels" id="levels"></div>
+    </div>
+    <div class="hud">
+      <div class="place" id="hudPlace">Fase 1 · Puerto Iguazú</div>
+      <div class="cell">tempo<b id="hudTime">0,0s</b></div>
+      <div class="cell">erros<b id="hudMiss">0</b></div>
+      <button class="btn small" id="hintBtn" type="button" disabled>Dica (+10s)</button>
+    </div>
+    <div class="clues">
+      <span class="lbl">Procure:</span>
+      <span class="d"><canvas id="clueCanvas" width="80" height="86" aria-hidden="true"></canvas><span id="clueName">disfarce</span></span>
+      <span class="chip">terno azul-marinho</span>
+      <span class="chip">mala marrom</span>
+    </div>
+    <div class="stage-scroll">
+      <div class="stage">
+        <canvas id="scene" width="1200" height="720" aria-label="Cena ilustrada com uma multidão onde o Flávio está disfarçado"></canvas>
+        <div class="overlay" id="overlay"><div class="panel" id="panel"></div></div>
+      </div>
+    </div>
+    <p class="legenda" id="legenda">Foto: leitor anônimo. Em telas pequenas, arraste a cena para os lados.</p>
+
+    <div class="results" id="results" hidden>
+      <div>
+        <div class="kicker">Resultado da sua investigação</div>
+        <div class="rank" id="rank"></div>
+        <div class="scoreline">
+          <div>tempo total<b id="rTime">0s</b></div>
+          <div>cliques errados<b id="rMiss">0</b></div>
+          <div>dicas<b id="rHint">0</b></div>
+        </div>
+        <p class="share" id="shareText"></p>
+        <div class="row">
+          <button class="btn small" id="copyBtn" type="button">Copiar resultado</button>
+          <button class="btn small ghost" id="againBtn" type="button">Procurar de novo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pistas" aria-labelledby="pistasTitle">
+    <div class="kicker">Segundo a imprensa</div>
+    <h3 id="pistasTitle">As pistas de verdade</h3>
+    <div class="cols">
+      <article class="nota">
+        <div class="src">O Bastidor</div>
+        <h4>Prazo para entregar passaportes venceu</h4>
+        <p>Sem a entrega em 24 horas e com relatos de que foi visto na Argentina, ele passou a ser tratado como foragido.</p>
+        <a href="https://obastidor.com.br/justica/o-fugitivo/" target="_blank" rel="noopener">Ler ↗</a>
+      </article>
+      <article class="nota">
+        <div class="src">Revista Fórum · via Infobae</div>
+        <h4>Um Gulfstream G400 em Puerto Iguazú</h4>
+        <p>O jato sairia com quatro passageiros rumo aos EUA. Nada comprova que o senador estava a bordo.</p>
+        <a href="https://revistaforum.com.br/politica/site-argentino-diz-que-flavio-bolsonaro-teria-fugido-para-os-eua-de-jatinho-apos-atravessar-fronteira/" target="_blank" rel="noopener">Ler ↗</a>
+      </article>
+      <article class="nota">
+        <div class="src">Nexo Jornal</div>
+        <h4>Argentina diz não ter registro de entrada</h4>
+        <p>Não há registro oficial de que ele cruzou a fronteira. O senador está incomunicável.</p>
+        <a href="https://www.nexojornal.com.br/expresso/2026/10/27/flavio-bolsonaro-fugiu-argentina-pf-passaporte" target="_blank" rel="noopener">Ler ↗</a>
+      </article>
+      <article class="nota">
+        <div class="src">Novo Notícias</div>
+        <h4>Avião tem voo barrado</h4>
+        <p>O jato citado nos relatos foi impedido de decolar. Aliados próximos dizem não saber onde ele está.</p>
+        <a href="https://novonoticias.com.br/onde-esta-flavio-bolsonaro-aliados-dizem-nao-saber-aviao-tem-voo-barrado-na-argentina/" target="_blank" rel="noopener">Ler ↗</a>
+      </article>
+      <article class="nota">
+        <div class="src">Revista Fórum</div>
+        <h4>Flávio nega que pretendia fugir</h4>
+        <p>Ele atribui a decisão de Moraes a declarações do irmão. Aliados chamaram a notícia de “fake”.</p>
+        <a href="https://revistaforum.com.br/politica/site-argentino-diz-que-flavio-bolsonaro-teria-fugido-para-os-eua-de-jatinho-apos-atravessar-fronteira/" target="_blank" rel="noopener">Ler ↗</a>
+      </article>
+      <article class="nota">
+        <div class="src">Poder360</div>
+        <h4>“Onde está Flávio?” dispara no Google</h4>
+        <p>As buscas por “Onde está Flávio?” e “Flávio fugiu” tiveram pico. Esta edição é a nossa contribuição.</p>
+        <a href="https://www.poder360.com.br/poder-eleicoes-2026/onde-esta-flavio-e-flavio-fugiu-tem-pico-nas-buscas-no-google/" target="_blank" rel="noopener">Ler ↗</a>
+      </article>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Isto é sátira.</b> A Gazeta do Paradeiro não existe, e os retratos, disfarces e cenários são ficção humorística. As pistas vêm das matérias linkadas. Até esta edição não havia confirmação oficial do paradeiro do senador. *Segundo relatos da imprensa.</p>
+  </footer>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* PERSONAGEM: quando a arte do Flávio chegar, coloque o caminho ou data: URI aqui.
+   Vazio = boneco placeholder desenhado em canvas. */
+const FLAVIO_IMG_SRC = "";
+
+const W = 1200, H = 720;
+const $ = (id) => document.getElementById(id);
+
+function mulberry(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+let rnd = mulberry((Date.now() * 7919) & 0x7fffffff);
+const pick = (a) => a[Math.floor(rnd() * a.length)];
+const between = (a, b) => a + rnd() * (b - a);
+
+function rr(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r);
+  c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r);
+  c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y);
+  c.closePath();
+}
+function poly(c, pts, fill) {
+  c.beginPath(); c.moveTo(pts[0], pts[1]);
+  for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]);
+  c.closePath(); c.fillStyle = fill; c.fill();
+}
+
+/* ---------- paleta das pessoas ---------- */
+const SKINS = ["#f1c27d", "#e0ac69", "#c68642", "#8d5524", "#ffdbac", "#a5694f"];
+const HAIRS = ["#2b1d14", "#3b2a1f", "#6b4423", "#a0522d", "#d9b26f", "#111", "#888"];
+const SHIRTS = ["#e63946", "#f4a261", "#2a9d8f", "#e9c46a", "#8338ec", "#3a86ff", "#ff006e", "#06d6a0", "#ffffff", "#adb5bd", "#fb8500", "#6a994e", "#ffb4a2"];
+const PANTS = ["#264653", "#3d405b", "#6c584c", "#22223b", "#a3b18a", "#577590", "#1d3557"];
+const BAGS = ["#7a4a24", "#2b2d42", "#e63946", "#457b9d", "#adb5bd", "#9c6644", "#264653"];
+const NAVY = "#1f2a44", BROWN = "#7a4a24";
+
+const GOLD_TIE = "#d6c07a";
+const BASE = { skin: "#e3b48c", hairc: "#3b2a1f", hairStyle: "short", pants: NAVY, suit: NAVY, tie: GOLD_TIE, browc: "#2b1d14" };
+
+/* ---------- os 15 disfarces ---------- */
+const DISG = [
+  { id: "original", nome: "O original", visto: "Brasília, até segunda-feira", set: {} },
+  { id: "barba", nome: "Barba de três semanas", visto: "Fila do free shop", set: { face: "beard", suit: "#2b2d42", tie: null } },
+  { id: "bone", nome: "Boné e bigode", visto: "Posto de gasolina em Foz", set: { hat: "cap", hatc: "#151515", face: "mustache", tie: null, suit: "#495057" } },
+  { id: "professor", nome: "Professor de cursinho", visto: "Rodoviária de Cascavel", set: { glasses: "clear", hairStyle: "long", hairc: "#3b2a1f", suit: "#457b9d", tie: null } },
+  { id: "ninja", nome: "Gorro e gola alta", visto: "Saindo de um Uber às 4h", set: { hat: "beanie", hatc: "#111", glasses: "dark", neck: "turtle", suit: "#111", tie: null } },
+  { id: "boina", nome: "Boina e cachecol", visto: "Café em Puerto Iguazú", set: { hat: "beret", hatc: "#55574a", glasses: "dark", neck: "scarf", scarfc: "#8d99ae", suit: "#222", tie: null } },
+  { id: "hippie", nome: "Mochileiro de Foz", visto: "Hostel perto das Cataratas", set: { hairStyle: "curly", hairc: "#5a3a22", hat: "band", hatc: "#e76f51", glasses: "round", suit: "#b5838d", tie: null } },
+  { id: "cowboy", nome: "Peão de rodeio", visto: "Feira agropecuária", set: { hat: "cowboy", hatc: "#8b5e34", face: "mustache", suit: "#6c584c", tie: null } },
+  { id: "portenho", nome: "Economista portenho", visto: "Avenida Corrientes", set: { hairStyle: "volume", sideburns: true, hairc: "#3b2a1f" } },
+  { id: "loiro", nome: "Golfista na Flórida", visto: "Campo de golfe com palmeiras", set: { hairStyle: "pomp", hairc: "#e9c46a", browc: "#c9a227", tie: "#d62828", skin: "#f4a582" } },
+  { id: "andino", nome: "Músico andino", visto: "Feirinha de artesanato", set: { hat: "chullo", flute: true, suit: "#bc4749", tie: null } },
+  { id: "gala", nome: "Galã de novela", visto: "Lobby de hotel cinco estrelas", set: { glasses: "dark", face: "goatee", hairc: "#111", suit: "#111", tie: null } },
+  { id: "careca", nome: "Torcedor VIP", visto: "Camarote de jogo da Seleção", set: { hairStyle: "bald", suit: "#1b9e5a", tie: "#ffd23f" } },
+  { id: "rasta", nome: "Regueiro da fronteira", visto: "Luau em Ciudad del Este", set: { hat: "rasta", hairStyle: "dreads", hairc: "#111", glasses: "round", suit: "#3d405b", tie: null } },
+  { id: "capa", nome: "Turista de capa", visto: "Passarela da Garganta do Diabo", set: { hat: "hood", hatc: "#ffd23f", poncho: "#ffd23f" } },
+];
+const byId = (id) => DISG.find((d) => d.id === id);
+
+let flavioImg = null;
+if (FLAVIO_IMG_SRC) {
+  const im = new Image();
+  im.onload = () => { flavioImg = im; drawMural(); drawClue(); if (game) buildScene(); };
+  im.src = FLAVIO_IMG_SRC;
+}
+
+/* ---------- desenho de uma pessoa (pés em x,y) ---------- */
+function drawPerson(c, p) {
+  const s = p.s;
+  c.save(); c.translate(p.x, p.y); c.scale(s, s);
+  if (!p.bust) { c.fillStyle = "rgba(0,0,0,.18)"; c.beginPath(); c.ellipse(0, 0, 12, 3.5, 0, 0, Math.PI * 2); c.fill(); }
+
+  if (p.hero && flavioImg) {
+    const h = 62, w = h * flavioImg.width / flavioImg.height;
+    c.drawImage(flavioImg, -w / 2, -h, w, h);
+    if (p.cutout) cutoutFrame(c);
+    c.restore(); return;
+  }
+  if (p.cutout) { poly(c, [6, -2, 16, -2, 4, -40], "#b08968"); }
+
+  if (p.bag) {
+    c.strokeStyle = "#111"; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(14, -22); c.lineTo(14, -28); c.lineTo(19, -28); c.lineTo(19, -22); c.stroke();
+    c.fillStyle = p.bag; rr(c, 10, -22, 13, 17, 2); c.fill();
+    c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(10, -15, 13, 2);
+    c.fillStyle = "#111"; c.beginPath(); c.arc(12.5, -4, 1.6, 0, 7); c.arc(20.5, -4, 1.6, 0, 7); c.fill();
+  }
+  c.fillStyle = p.pants || "#333"; c.fillRect(-6, -19, 5, 17); c.fillRect(1, -19, 5, 17);
+  c.fillStyle = "#1a1a1a"; c.fillRect(-7, -3, 6, 3); c.fillRect(1, -3, 6, 3);
+
+  const top = p.suit || p.shirt;
+  c.fillStyle = top; rr(c, -8.5, -39, 17, 22, 4); c.fill();
+  c.fillRect(-12, -37, 4, 15); c.fillRect(8, -37, 4, 15);
+  c.fillStyle = p.skin; c.beginPath(); c.arc(-10, -21, 2.4, 0, 7); c.arc(10, -21, 2.4, 0, 7); c.fill();
+  if (p.suit) {
+    poly(c, [-3.5, -39, 3.5, -39, 0, -31], "#f8f9fa");
+    if (p.tie) poly(c, [-1, -35, 1, -35, 1.2, -27, 0, -25, -1.2, -27], p.tie);
+  }
+  if (p.jersey) { c.fillStyle = "#1b9e5a"; c.fillRect(-8.5, -39, 17, 2.5); }
+  if (p.neck === "turtle") { c.fillStyle = "#111"; rr(c, -5.5, -41, 11, 5, 2); c.fill(); }
+  if (p.neck === "scarf") { c.fillStyle = p.scarfc; rr(c, -7.5, -41, 15, 5, 2); c.fill(); c.fillRect(2, -38, 4, 11); }
+  if (p.poncho) { c.globalAlpha = .55; poly(c, [-14, -18, 14, -18, 0, -50], p.poncho); c.globalAlpha = 1; }
+
+  const hc = p.hairc || "#222";
+  // cabelo atrás da cabeça
+  if (p.hairStyle === "long") { c.fillStyle = hc; rr(c, -8.5, -51, 17, 15, 4); c.fill(); }
+  if (p.hairStyle === "curly") { c.fillStyle = hc; for (let a = 0; a < 12; a++) { const ang = Math.PI * .85 + a * .16; c.beginPath(); c.arc(Math.cos(ang) * 8, -46 + Math.sin(ang) * 8 + (a > 8 ? 3 : 0), 3.4, 0, 7); c.fill(); } rr(c, -9.5, -48, 19, 12, 5); c.fill(); }
+  if (p.hairStyle === "volume") { c.fillStyle = hc; c.beginPath(); c.arc(0, -49, 10.5, 0, 7); c.fill(); }
+  if (p.hairStyle === "dreads") { c.strokeStyle = hc; c.lineWidth = 1.8; for (let x = -8; x <= 8; x += 2.3) { c.beginPath(); c.moveTo(x, -50); c.lineTo(x * 1.15, -34); c.stroke(); } }
+  // cabeça
+  c.fillStyle = p.skin; c.beginPath(); c.arc(0, -46, 7, 0, Math.PI * 2); c.fill();
+  if (p.sideburns) { c.fillStyle = hc; c.fillRect(-7.2, -48, 2.4, 7); c.fillRect(4.8, -48, 2.4, 7); }
+  // cabelo de cima
+  c.fillStyle = hc;
+  if (["short", "long", "dreads", "volume", undefined].includes(p.hairStyle)) { c.beginPath(); c.arc(0, -47, 7.4, Math.PI * 1.02, Math.PI * 1.98); c.closePath(); c.fill(); }
+  if (p.hairStyle === "pomp") { c.beginPath(); c.arc(0, -47, 7.4, Math.PI * 1.02, Math.PI * 1.98); c.closePath(); c.fill(); c.beginPath(); c.ellipse(2, -53.2, 8.5, 3.6, -.12, 0, 7); c.fill(); }
+  if (p.hairStyle === "bald") { c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.ellipse(-2.5, -51, 2.5, 1.2, -.4, 0, 7); c.fill(); }
+  // sobrancelhas
+  c.fillStyle = p.browc || "#222"; c.fillRect(-5.8, -49.9, 4.2, 1.1); c.fillRect(1.6, -49.9, 4.2, 1.1);
+  // olhos / óculos
+  if (p.glasses === "dark") { c.fillStyle = "#0b0b0b"; rr(c, -6.2, -48, 5.2, 3.4, 1); c.fill(); rr(c, 1, -48, 5.2, 3.4, 1); c.fill(); c.fillRect(-1.2, -47, 2.4, 1); }
+  else if (p.glasses === "round") { c.fillStyle = "#0b0b0b"; c.beginPath(); c.arc(-3.3, -46.4, 2.3, 0, 7); c.arc(3.3, -46.4, 2.3, 0, 7); c.fill(); c.fillRect(-1.2, -46.8, 2.4, .8); }
+  else {
+    c.fillStyle = "#1a1a1a"; c.beginPath(); c.arc(-2.5, -46.2, .9, 0, 7); c.arc(2.5, -46.2, .9, 0, 7); c.fill();
+    if (p.glasses === "clear") { c.strokeStyle = "#111"; c.lineWidth = .8; c.strokeRect(-5.8, -48, 4.8, 3.4); c.strokeRect(1, -48, 4.8, 3.4); }
+  }
+  // barba, bigode, boca
+  if (p.face === "beard") { c.fillStyle = hc; c.beginPath(); c.arc(0, -45.5, 7.2, .1, Math.PI - .1); c.closePath(); c.fill(); }
+  if (p.face === "goatee") { c.fillStyle = hc; rr(c, -1.8, -42.2, 3.6, 3.4, 1.2); c.fill(); }
+  if (p.face === "mustache" || p.face === "goatee" || p.face === "beard") { c.fillStyle = p.face === "beard" ? "#1a120c" : hc; rr(c, -3.6, -44.4, 7.2, 1.7, .8); c.fill(); }
+  c.strokeStyle = "rgba(0,0,0,.5)"; c.lineWidth = .8; c.beginPath(); c.moveTo(-1.8, -42.4); c.lineTo(1.8, -42.4); c.stroke();
+  // chapéus
+  const hat = p.hat, hcol = p.hatc;
+  if (hat === "cap") { c.fillStyle = hcol; c.beginPath(); c.arc(0, -49, 7.6, Math.PI, 0); c.fill(); c.fillRect(-7.6, -50, 18, 2.2); }
+  else if (hat === "sun") { c.fillStyle = hcol; c.beginPath(); c.ellipse(0, -51, 12, 2.6, 0, 0, 7); c.fill(); rr(c, -6, -58, 12, 7, 2); c.fill(); }
+  else if (hat === "beanie") { c.fillStyle = hcol; c.beginPath(); c.arc(0, -48.5, 7.9, Math.PI, 0); c.fill(); rr(c, -8, -50, 16, 3.2, 1); c.fill(); }
+  else if (hat === "beret") { c.fillStyle = hcol; c.beginPath(); c.ellipse(1, -51.5, 9, 3.4, -.15, 0, 7); c.fill(); c.fillRect(-7, -51, 14, 2); }
+  else if (hat === "cowboy") { c.fillStyle = hcol; c.beginPath(); c.ellipse(0, -51, 14, 2.6, 0, 0, 7); c.fill(); rr(c, -6, -61, 12, 10, 3); c.fill(); c.fillStyle = "#3d2b1f"; c.fillRect(-6, -53.5, 12, 1.6); }
+  else if (hat === "chullo") {
+    c.save(); c.beginPath(); c.arc(0, -48, 8, Math.PI, 0); c.rect(-8, -48, 16, 2); c.clip();
+    ["#e63946", "#ffd23f", "#2a9d8f", "#3a86ff", "#e63946"].forEach((col, i) => { c.fillStyle = col; c.fillRect(-9, -57 + i * 2.3, 18, 2.3); });
+    c.restore();
+    c.fillStyle = "#e63946"; c.fillRect(-8.2, -47, 2.6, 8); c.fillRect(5.6, -47, 2.6, 8);
+    c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(0, -56.5, 2.2, 0, 7); c.fill();
+  }
+  else if (hat === "rasta") { c.save(); rr(c, -8.5, -61, 17, 12, 5); c.clip(); ["#e63946", "#ffd23f", "#1b9e5a"].forEach((col, i) => { c.fillStyle = col; c.fillRect(-9, -61 + i * 4, 18, 4); }); c.restore(); }
+  else if (hat === "hood") { c.strokeStyle = hcol; c.lineWidth = 3.6; c.beginPath(); c.arc(0, -46.5, 8.6, Math.PI * .8, Math.PI * 2.2); c.stroke(); }
+  else if (hat === "band") { c.fillStyle = hcol; c.fillRect(-7.6, -51.2, 15.2, 2.4); c.fillStyle = "#ffd23f"; for (let x = -6; x < 7; x += 3) c.fillRect(x, -50.6, 1.2, 1.2); }
+  if (p.flute) { for (let i = 0; i < 6; i++) { c.fillStyle = i % 2 ? "#c9a227" : "#d4a373"; c.fillRect(-8.5 + i * 1.7, -43.5, 1.4, 5 + i * 1); } c.fillStyle = "#8b5e34"; c.fillRect(-8.6, -41, 10.4, 1); }
+  c.restore();
+}
+function cutoutFrame(c) { c.strokeStyle = "#fff"; c.lineWidth = 3; c.strokeRect(-16, -64, 32, 64); }
+
+/* Flávio com um disfarce (para cena ou retrato) */
+function flavioWith(d, extra) {
+  const p = Object.assign({}, BASE, d.set, { hero: true }, extra || {});
+  return p;
+}
+
+/* retrato estilo foto de estúdio: caricatura desenhada a partir da foto de referência */
+function drawPortrait(cv, d) {
+  const c = cv.getContext("2d"), w = cv.width, h = cv.height;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h);
+  const g = c.createRadialGradient(w * .5, h * .35, 4, w * .5, h * .5, w * .8);
+  g.addColorStop(0, "#c9c6bd"); g.addColorStop(1, "#a19d93");
+  c.fillStyle = g; c.fillRect(0, 0, w, h);
+  c.save(); c.scale(w / 200, h / 216);
+  drawCaricature(c, flavioWith(d));
+  c.restore();
+  c.fillStyle = "rgba(0,0,0,.06)"; for (let i = 0; i < 400; i++) c.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+}
+
+function shade(hex, k) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v) => Math.max(0, Math.min(255, Math.round(v * k)));
+  return "#" + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+function headPath(c) {
+  c.beginPath();
+  c.moveTo(100, 30);
+  c.bezierCurveTo(131, 30, 148, 50, 148, 84);
+  c.bezierCurveTo(149, 106, 147, 123, 138, 137);
+  c.bezierCurveTo(128, 153, 114, 161, 100, 161);
+  c.bezierCurveTo(86, 161, 72, 153, 62, 137);
+  c.bezierCurveTo(53, 123, 51, 106, 52, 84);
+  c.bezierCurveTo(52, 50, 69, 30, 100, 30);
+  c.closePath();
+}
+
+/* espaço de 200×216: cabeça centrada em ~(100,95), ombros na base */
+function drawCaricature(c, p) {
+  const skin = p.skin, skinD = shade(skin, .82), skinDD = shade(skin, .68);
+  const hc = p.hairc, suit = p.suit || "#333";
+
+  // capuz e cabelos que ficam atrás da cabeça
+  if (p.hat === "hood") { c.fillStyle = shade(p.hatc, .85); c.beginPath(); c.ellipse(100, 98, 70, 82, 0, 0, 7); c.fill(); }
+  if (p.hairStyle === "long") { c.fillStyle = hc; rr(c, 42, 40, 116, 136, 40); c.fill(); }
+  if (p.hairStyle === "curly") { c.fillStyle = hc; for (let a = 0; a < 22; a++) { const t = Math.PI * .75 + a * (Math.PI * 1.5 / 21); c.beginPath(); c.arc(100 + Math.cos(t) * 62, 92 + Math.sin(t) * 66, 17, 0, 7); c.fill(); } }
+  if (p.hairStyle === "volume") { c.fillStyle = hc; for (let a = 0; a < 16; a++) { const t = Math.PI * .85 + a * (Math.PI * 1.3 / 15); c.beginPath(); c.arc(100 + Math.cos(t) * 60, 84 + Math.sin(t) * 60, 22, 0, 7); c.fill(); } }
+  if (p.hairStyle === "dreads") { c.strokeStyle = hc; c.lineCap = "round"; c.lineWidth = 8; for (let x = 48; x <= 152; x += 9) { c.beginPath(); c.moveTo(x, 50); c.quadraticCurveTo(x + (x < 100 ? -10 : 10), 130, x + (x < 100 ? -6 : 6), 196); c.stroke(); } }
+
+  // pescoço
+  c.fillStyle = skinD; c.fillRect(78, 136, 44, 40);
+
+  // tronco
+  c.fillStyle = suit;
+  c.beginPath(); c.moveTo(-4, 216); c.lineTo(8, 186); c.quadraticCurveTo(28, 166, 72, 162); c.lineTo(128, 162); c.quadraticCurveTo(172, 166, 192, 186); c.lineTo(204, 216); c.closePath(); c.fill();
+  if (p.neck === "turtle") {
+    c.fillStyle = "#151515"; rr(c, 72, 142, 56, 34, 12); c.fill();
+    c.strokeStyle = "#2a2a2a"; c.lineWidth = 2; for (let y = 148; y < 174; y += 6) { c.beginPath(); c.moveTo(74, y); c.lineTo(126, y); c.stroke(); }
+  } else {
+    poly(c, [76, 162, 124, 162, 100, 212], "#f4f4f2");
+    c.strokeStyle = "rgba(0,0,0,.18)"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(76, 162); c.lineTo(100, 212); c.lineTo(124, 162); c.stroke();
+    poly(c, [78, 158, 98, 170, 90, 180], "#ffffff"); poly(c, [122, 158, 102, 170, 110, 180], "#ffffff");
+    if (p.tie) {
+      poly(c, [93, 168, 107, 168, 105, 180, 95, 180], shade(p.tie, .9));
+      poly(c, [95, 180, 105, 180, 112, 212, 100, 222, 88, 212], p.tie);
+      c.fillStyle = shade(p.tie, .72); for (let y = 186; y < 214; y += 6) for (let x = 92 + (y % 12 ? 3 : 0); x < 110; x += 6) { c.beginPath(); c.arc(x, y, 1.1, 0, 7); c.fill(); }
+    }
+    // lapelas
+    c.fillStyle = shade(suit, .78);
+    poly(c, [72, 162, 84, 162, 96, 216, 80, 216, 66, 186], shade(suit, .82));
+    poly(c, [128, 162, 116, 162, 104, 216, 120, 216, 134, 186], shade(suit, .82));
+    c.fillStyle = "#c9a227"; c.beginPath(); c.arc(146, 196, 4, 0, 7); c.fill(); c.fillStyle = "#1b9e5a"; c.beginPath(); c.arc(146, 196, 1.8, 0, 7); c.fill();
+  }
+  if (p.neck === "scarf") {
+    c.fillStyle = p.scarfc; rr(c, 64, 148, 72, 22, 10); c.fill();
+    c.fillStyle = shade(p.scarfc, .85); rr(c, 110, 160, 18, 50, 6); c.fill();
+    c.strokeStyle = shade(p.scarfc, .7); c.lineWidth = 1.5; for (let x = 70; x < 134; x += 8) { c.beginPath(); c.moveTo(x, 150); c.lineTo(x + 4, 168); c.stroke(); }
+  }
+  if (p.poncho) {
+    c.globalAlpha = .82; c.fillStyle = p.poncho;
+    c.beginPath(); c.moveTo(-4, 216); c.lineTo(14, 178); c.quadraticCurveTo(50, 150, 100, 150); c.quadraticCurveTo(150, 150, 186, 178); c.lineTo(204, 216); c.closePath(); c.fill();
+    c.globalAlpha = 1; c.strokeStyle = shade(p.poncho, .75); c.lineWidth = 2; c.beginPath(); c.moveTo(100, 156); c.lineTo(100, 216); c.stroke();
+  }
+
+  // orelhas
+  c.fillStyle = skinD;
+  c.beginPath(); c.ellipse(52, 96, 8, 14, -.1, 0, 7); c.fill();
+  c.beginPath(); c.ellipse(148, 96, 8, 14, .1, 0, 7); c.fill();
+
+  // cabeça e sombreamento
+  c.fillStyle = skin; headPath(c); c.fill();
+  c.save(); headPath(c); c.clip();
+  c.fillStyle = "rgba(60,45,40,.13)"; c.beginPath(); c.ellipse(100, 152, 50, 22, 0, 0, 7); c.fill();          // barba por fazer
+  c.fillStyle = "rgba(120,70,50,.16)"; c.beginPath(); c.ellipse(66, 128, 14, 18, 0, 0, 7); c.ellipse(134, 128, 14, 18, 0, 0, 7); c.fill(); // bochechas
+  c.fillStyle = "rgba(255,255,255,.14)"; c.beginPath(); c.ellipse(86, 58, 26, 12, -.2, 0, 7); c.fill();       // brilho da testa
+  c.restore();
+
+  // costeletas (portenho)
+  if (p.sideburns) { c.fillStyle = hc; rr(c, 50, 72, 12, 58, 5); c.fill(); rr(c, 138, 72, 12, 58, 5); c.fill(); }
+
+  // cabelo de cima
+  c.fillStyle = hc;
+  if (["short", "long", "dreads", "volume", "curly"].includes(p.hairStyle)) {
+    c.beginPath();
+    c.moveTo(53, 90);
+    c.bezierCurveTo(46, 50, 66, 22, 100, 21);
+    c.bezierCurveTo(136, 21, 155, 48, 147, 90);
+    c.bezierCurveTo(146, 74, 142, 62, 134, 58);       // entrada direita
+    c.bezierCurveTo(124, 52, 112, 54, 104, 49);
+    c.bezierCurveTo(92, 44, 76, 52, 67, 60);          // entrada esquerda
+    c.bezierCurveTo(60, 66, 56, 76, 56, 90);
+    c.closePath(); c.fill();
+    c.strokeStyle = shade(hc, 1.5); c.lineWidth = 1.4; c.globalAlpha = .55;
+    for (let i = 0; i < 6; i++) { c.beginPath(); c.moveTo(70 + i * 10, 46 - i * 2); c.quadraticCurveTo(96 + i * 6, 26, 130 + i * 3, 38 + i * 3); c.stroke(); }
+    c.globalAlpha = 1;
+  }
+  if (p.hairStyle === "pomp") {
+    c.beginPath(); c.moveTo(52, 88); c.bezierCurveTo(44, 40, 70, 14, 110, 16); c.bezierCurveTo(150, 18, 166, 44, 150, 70);
+    c.bezierCurveTo(146, 84, 148, 88, 148, 92); c.bezierCurveTo(140, 66, 120, 50, 90, 54); c.bezierCurveTo(70, 56, 58, 70, 56, 90); c.closePath(); c.fill();
+    c.fillStyle = shade(hc, 1.12); c.beginPath(); c.ellipse(112, 30, 44, 14, -.1, 0, 7); c.fill();
+  }
+  if (p.hairStyle === "bald") { c.fillStyle = "rgba(255,255,255,.4)"; c.beginPath(); c.ellipse(84, 46, 18, 7, -.35, 0, 7); c.fill(); }
+
+  // sobrancelhas grossas, a direita levantada
+  c.fillStyle = p.browc;
+  c.beginPath(); c.moveTo(62, 80); c.quadraticCurveTo(76, 70, 93, 77); c.lineTo(92, 82); c.quadraticCurveTo(77, 77, 63, 85); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(107, 75); c.quadraticCurveTo(122, 64, 138, 72); c.lineTo(137, 77); c.quadraticCurveTo(122, 71, 108, 80); c.closePath(); c.fill();
+
+  // olhos: pálpebra pesada, íris esverdeada olhando para cima
+  [[78, 94], [122, 91]].forEach(([ex, ey]) => {
+    c.fillStyle = skinD; c.beginPath(); c.ellipse(ex, ey - 6, 13, 6, 0, Math.PI, 0); c.fill();
+    c.fillStyle = "#f6f1ea"; c.beginPath(); c.ellipse(ex, ey, 11, 5.2, 0, 0, 7); c.fill();
+    c.save(); c.beginPath(); c.ellipse(ex, ey, 11, 5.2, 0, 0, 7); c.clip();
+    c.fillStyle = "#6f7f62"; c.beginPath(); c.arc(ex - 2, ey - 1.5, 4.6, 0, 7); c.fill();
+    c.fillStyle = "#1a1a1a"; c.beginPath(); c.arc(ex - 2, ey - 1.5, 2, 0, 7); c.fill();
+    c.fillStyle = skinD; c.fillRect(ex - 12, ey - 6, 24, 3.6);
+    c.restore();
+    c.strokeStyle = "#2b1d14"; c.lineWidth = 2.2; c.beginPath(); c.ellipse(ex, ey - .6, 11, 4.6, 0, Math.PI * 1.05, Math.PI * 1.95); c.stroke();
+    c.strokeStyle = skinDD; c.lineWidth = 1.2; c.beginPath(); c.arc(ex, ey + 4, 9, .35, Math.PI - .35); c.stroke();
+  });
+
+  // óculos
+  if (p.glasses === "dark") {
+    c.fillStyle = "#0d0d0d"; rr(c, 62, 84, 32, 18, 6); c.fill(); rr(c, 106, 81, 32, 18, 6); c.fill(); c.fillRect(92, 88, 16, 3);
+    c.fillStyle = "rgba(255,255,255,.18)"; c.fillRect(68, 87, 10, 3); c.fillRect(112, 84, 10, 3);
+  } else if (p.glasses === "round") {
+    c.fillStyle = "#0d0d0d"; c.beginPath(); c.arc(78, 93, 13, 0, 7); c.arc(122, 90, 13, 0, 7); c.fill(); c.fillRect(90, 89, 20, 3);
+  } else if (p.glasses === "clear") {
+    c.strokeStyle = "#151515"; c.lineWidth = 3; rr(c, 62, 83, 32, 19, 4); c.stroke(); rr(c, 106, 80, 32, 19, 4); c.stroke();
+    c.beginPath(); c.moveTo(94, 90); c.lineTo(106, 88); c.stroke();
+  }
+
+  // nariz grande de ponta arredondada
+  c.strokeStyle = skinDD; c.lineWidth = 2; c.beginPath(); c.moveTo(97, 92); c.quadraticCurveTo(92, 108, 91, 120); c.stroke();
+  c.fillStyle = skinD; c.beginPath(); c.ellipse(101, 121, 12, 8.5, 0, 0, 7); c.fill();
+  c.fillStyle = shade(skin, 1.04); c.beginPath(); c.ellipse(102, 118, 7, 5, 0, 0, 7); c.fill();
+  c.fillStyle = "#5a3a2a"; c.beginPath(); c.ellipse(94, 126, 3, 1.6, .3, 0, 7); c.ellipse(108, 126, 3, 1.6, -.3, 0, 7); c.fill();
+  // sulcos e boca apertada
+  c.strokeStyle = skinDD; c.lineWidth = 1.6;
+  c.beginPath(); c.moveTo(86, 124); c.quadraticCurveTo(79, 133, 82, 146); c.stroke();
+  c.beginPath(); c.moveTo(116, 124); c.quadraticCurveTo(123, 133, 120, 146); c.stroke();
+
+  if (p.face === "beard") {
+    c.fillStyle = hc; c.globalAlpha = .95;
+    c.beginPath(); c.moveTo(54, 100); c.bezierCurveTo(56, 132, 74, 164, 100, 166); c.bezierCurveTo(126, 164, 144, 132, 146, 100);
+    c.bezierCurveTo(140, 122, 128, 132, 118, 134); c.lineTo(82, 134); c.bezierCurveTo(72, 132, 60, 122, 54, 100); c.closePath(); c.fill();
+    c.globalAlpha = 1;
+  }
+  if (p.face === "goatee") { c.fillStyle = hc; rr(c, 90, 146, 20, 16, 7); c.fill(); }
+  if (p.face === "mustache" || p.face === "goatee" || p.face === "beard") {
+    c.fillStyle = p.face === "beard" ? shade(hc, .8) : hc;
+    c.beginPath(); c.moveTo(82, 140); c.quadraticCurveTo(90, 128, 100, 133); c.quadraticCurveTo(110, 128, 118, 140); c.quadraticCurveTo(100, 137, 82, 140); c.fill();
+  }
+  c.strokeStyle = "#6e3b32"; c.lineWidth = 2.4; c.lineCap = "round";
+  c.beginPath(); c.moveTo(87, 142); c.quadraticCurveTo(100, 139, 113, 143); c.stroke();
+  c.fillStyle = "rgba(150,80,70,.25)"; c.beginPath(); c.ellipse(100, 146, 9, 2.6, 0, 0, 7); c.fill();
+
+  // chapéus
+  const hat = p.hat, hcol = p.hatc;
+  if (hat === "cap") {
+    c.fillStyle = hcol; c.beginPath(); c.arc(100, 64, 52, Math.PI, 0); c.fill();
+    c.fillStyle = shade(hcol, 1.35); c.beginPath(); c.ellipse(100, 64, 58, 11, 0, 0, Math.PI); c.fill();
+    c.strokeStyle = shade(hcol, 1.6); c.lineWidth = 1; c.beginPath(); c.moveTo(100, 14); c.lineTo(100, 62); c.stroke();
+  } else if (hat === "beanie") {
+    c.fillStyle = hcol; c.beginPath(); c.arc(100, 66, 53, Math.PI, 0); c.fill();
+    c.fillStyle = shade(hcol, 1.5); rr(c, 44, 54, 112, 20, 8); c.fill();
+    c.strokeStyle = shade(hcol, 2); c.lineWidth = 1; for (let x = 50; x < 152; x += 6) { c.beginPath(); c.moveTo(x, 56); c.lineTo(x, 72); c.stroke(); }
+  } else if (hat === "beret") {
+    c.fillStyle = hcol; c.beginPath(); c.ellipse(108, 40, 62, 20, -.16, 0, 7); c.fill();
+    c.fillStyle = shade(hcol, .8); rr(c, 52, 46, 98, 10, 5); c.fill(); c.fillRect(110, 16, 4, 8);
+  } else if (hat === "cowboy") {
+    c.fillStyle = shade(hcol, .85); c.beginPath(); c.ellipse(100, 50, 92, 15, 0, 0, 7); c.fill();
+    c.fillStyle = hcol; c.beginPath(); c.moveTo(62, 50); c.bezierCurveTo(58, 10, 82, 0, 100, 10); c.bezierCurveTo(118, 0, 142, 10, 138, 50); c.closePath(); c.fill();
+    c.fillStyle = "#3d2b1f"; c.fillRect(62, 38, 76, 8);
+  } else if (hat === "chullo") {
+    c.save(); c.beginPath(); c.arc(100, 66, 54, Math.PI, 0); c.closePath(); c.clip();
+    ["#e63946", "#ffd23f", "#2a9d8f", "#3a86ff", "#e63946", "#ffd23f", "#2a9d8f"].forEach((col, i) => { c.fillStyle = col; c.fillRect(40, 10 + i * 8, 120, 8); });
+    c.fillStyle = "#fff"; for (let x = 46; x < 156; x += 10) { poly(c, [x, 42, x + 5, 36, x + 10, 42], "#fff"); }
+    c.restore();
+    c.fillStyle = "#e63946"; poly(c, [46, 64, 62, 64, 58, 118, 50, 118], "#e63946"); poly(c, [138, 64, 154, 64, 150, 118, 142, 118], "#e63946");
+    c.strokeStyle = "#ffd23f"; c.lineWidth = 3; c.beginPath(); c.moveTo(54, 118); c.lineTo(54, 140); c.moveTo(146, 118); c.lineTo(146, 140); c.stroke();
+    c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(100, 12, 9, 0, 7); c.fill();
+  } else if (hat === "rasta") {
+    c.save(); c.beginPath(); c.ellipse(100, 36, 64, 34, 0, 0, 7); c.clip();
+    ["#e63946", "#ffd23f", "#1b9e5a"].forEach((col, i) => { c.fillStyle = col; c.fillRect(30, 2 + i * 22, 140, 22); });
+    c.restore(); c.fillStyle = "#151515"; rr(c, 46, 58, 108, 10, 5); c.fill();
+  } else if (hat === "hood") {
+    c.strokeStyle = hcol; c.lineWidth = 14; c.beginPath(); c.ellipse(100, 98, 62, 74, 0, Math.PI * .82, Math.PI * 2.18); c.stroke();
+    c.strokeStyle = shade(hcol, .8); c.lineWidth = 2; c.beginPath(); c.ellipse(100, 98, 56, 68, 0, Math.PI * .85, Math.PI * 2.15); c.stroke();
+  } else if (hat === "band") {
+    c.fillStyle = hcol; c.beginPath(); c.moveTo(50, 62); c.quadraticCurveTo(100, 46, 150, 60); c.lineTo(150, 72); c.quadraticCurveTo(100, 58, 50, 74); c.closePath(); c.fill();
+    c.fillStyle = "#ffd23f"; for (let x = 56; x < 146; x += 10) { c.beginPath(); c.arc(x, 64 - Math.sin((x - 50) / 100 * Math.PI) * 6, 2, 0, 7); c.fill(); }
+  }
+
+  // flauta de pã
+  if (p.flute) {
+    for (let i = 0; i < 7; i++) { c.fillStyle = i % 2 ? "#c9a227" : "#d4a373"; rr(c, 56 + i * 7, 140, 6, 26 + i * 6, 2); c.fill(); }
+    c.fillStyle = "#8b5e34"; c.fillRect(54, 150, 52, 5);
+  }
+}
+
+/* ---------- mural ---------- */
+function drawMural() {
+  const el = $("mural");
+  el.innerHTML = "";
+  DISG.forEach((d, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "card"; b.dataset.id = d.id;
+    b.setAttribute("aria-label", `Disfarce ${i + 1}: ${d.nome}. Abrir ficha.`);
+    const cv = document.createElement("canvas"); cv.width = 260; cv.height = 281;
+    b.appendChild(cv);
+    b.insertAdjacentHTML("beforeend", `<span class="num">${String(i + 1).padStart(2, "0")}</span><span class="cap">${d.nome}</span>`);
+    drawPortrait(cv, d);
+    b.addEventListener("click", () => toggleFicha(b, d));
+    el.appendChild(b);
+  });
+  markCurrent();
+}
+function toggleFicha(b, d) {
+  const open = b.querySelector(".back");
+  if (open) { open.remove(); return; }
+  const pct = d.id === "original" ? 2 : 8 + Math.floor(Math.random() * 80);
+  b.insertAdjacentHTML("beforeend", `<span class="back"><small>Ficha nº ${String(DISG.indexOf(d) + 1).padStart(2, "0")}</small><b>${d.nome}</b><span>Visto em: ${d.visto}</span><small>Status: não confirmado</small><span class="pct">${pct}%</span><small>chance de ser ele</small></span>`);
+}
+function markCurrent() {
+  document.querySelectorAll(".card").forEach((c) => c.classList.toggle("now", !!game && game.state !== "done" && c.dataset.id === game.disg[game.level]));
+}
+
+/* ---------- cenários ---------- */
+function sky(c, y, a, b) { const g = c.createLinearGradient(0, 0, 0, y); g.addColorStop(0, a); g.addColorStop(1, b); c.fillStyle = g; c.fillRect(0, 0, W, y); }
+function label(c, txt, x, y, size, color, bg) {
+  c.font = `600 ${size}px Oswald, "Arial Narrow", sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
+  if (bg) { const w = c.measureText(txt).width + size; c.fillStyle = bg; rr(c, x - w / 2, y - size * .8, w, size * 1.6, 3); c.fill(); }
+  c.fillStyle = color; c.fillText(txt, x, y);
+}
+function jet(c, x, y, k, tail, flip) {
+  c.save(); c.translate(x, y); c.scale(flip ? -k : k, k);
+  c.fillStyle = "rgba(0,0,0,.15)"; c.beginPath(); c.ellipse(0, 34, 150, 10, 0, 0, 7); c.fill();
+  poly(c, [-40, 4, 30, 4, -30, 42, -60, 42], "#cfd8e3");
+  c.fillStyle = "#fff"; rr(c, -150, -14, 280, 34, 17); c.fill();
+  poly(c, [100, -12, 150, 2, 130, 20, 100, 20], "#fff");
+  poly(c, [-150, -10, -120, -10, -112, -70, -138, -70], "#fff");
+  c.fillStyle = "#1d3557"; c.fillRect(-150, 6, 280, 4);
+  c.fillStyle = "#14213d"; for (let i = -100; i < 80; i += 18) { rr(c, i, -6, 9, 7, 3); c.fill(); }
+  rr(c, 110, -8, 18, 8, 3); c.fill();
+  c.fillStyle = "#333"; c.beginPath(); c.arc(-40, 24, 6, 0, 7); c.arc(90, 24, 5, 0, 7); c.fill();
+  if (tail) { c.save(); if (flip) c.scale(-1, 1); c.font = "13px 'IBM Plex Mono', monospace"; c.fillStyle = "#c8102e"; c.textAlign = "center"; c.fillText(tail, flip ? 125 : -125, -38); c.restore(); }
+  c.restore();
+}
+function palm(c, x, y, k) {
+  c.save(); c.translate(x, y); c.scale(k, k);
+  c.strokeStyle = "#8b5e34"; c.lineWidth = 10; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(12, -60, 4, -130); c.stroke();
+  c.fillStyle = "#2d6a4f";
+  for (let i = 0; i < 6; i++) { c.save(); c.translate(4, -130); c.rotate(-2.6 + i * .9); c.beginPath(); c.ellipse(34, 0, 38, 9, 0, 0, 7); c.fill(); c.restore(); }
+  c.restore();
+}
+
+const LEVELS = [
+  {
+    name: "Puerto Iguazú", tag: "A pista do jatinho", pool: ["bone", "ninja", "boina", "gala", "barba"],
+    intro: "A imprensa argentina diz que um jatinho ficou parado aqui. Ele estaria disfarçado entre os passageiros.",
+    zone: [40, 1160, 360, 700], count: 150, p: { suit: .12, bag: .45, disg: .12 },
+    bg(c) {
+      sky(c, 250, "#8ecae6", "#e0f4ff");
+      c.fillStyle = "#52b788"; for (let i = 0; i < 9; i++) { c.beginPath(); c.ellipse(i * 150, 250, 130, 50, 0, Math.PI, 0); c.fill(); }
+      c.fillStyle = "#e9e4d8"; c.fillRect(60, 140, 560, 110); c.fillStyle = "#c9c1ad"; c.fillRect(60, 140, 560, 14);
+      c.fillStyle = "#8ecae6"; for (let i = 80; i < 600; i += 46) c.fillRect(i, 172, 34, 50);
+      label(c, "AEROPUERTO · PUERTO IGUAZÚ", 340, 120, 22, "#141414", "#ffd23f");
+      c.fillStyle = "#e9e4d8"; c.fillRect(905, 90, 34, 160); c.fillStyle = "#14213d"; rr(c, 880, 60, 84, 40, 8); c.fill(); c.fillStyle = "#8ecae6"; c.fillRect(888, 68, 68, 22);
+      c.fillStyle = "#8d99ae"; c.fillRect(0, 250, W, H - 250);
+      c.fillStyle = "#ffd23f"; for (let x = 0; x < W; x += 80) c.fillRect(x, 340, 44, 5);
+      c.fillStyle = "#adb5bd"; for (let i = 0; i < 40; i++) c.fillRect(rnd() * W, 260 + rnd() * 460, between(20, 60), 2);
+      jet(c, 830, 300, .9, "LV-FUJ", true);
+      jet(c, 260, 312, .7, "", false);
+      label(c, "PORTÃO 3 · EMBARQUE PRIVADO", 1010, 220, 14, "#fff", "#c8102e");
+    },
+  },
+  {
+    name: "Cataratas do Iguaçu", tag: "Todo mundo de capa", pool: ["capa"],
+    intro: "Metade dos turistas está de capa de chuva amarela. Ótimo lugar para sumir na neblina.",
+    zone: [40, 1160, 400, 700], count: 175, ponchos: true, p: { suit: .12, bag: .3, disg: .08 },
+    bg(c) {
+      sky(c, 120, "#a9def9", "#e4f6ff");
+      c.fillStyle = "#2d6a4f"; c.fillRect(0, 60, W, 270);
+      c.fillStyle = "#1b4332"; for (let i = 0; i < 30; i++) { c.beginPath(); c.arc(rnd() * W, 70 + rnd() * 40, between(30, 60), 0, 7); c.fill(); }
+      for (let i = 0; i < 7; i++) {
+        const x = 40 + i * 170, w = between(90, 140);
+        const g = c.createLinearGradient(0, 110, 0, 330); g.addColorStop(0, "#e0fbfc"); g.addColorStop(1, "#98c1d9");
+        c.fillStyle = g; c.fillRect(x, 110, w, 230);
+        c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2;
+        for (let j = 0; j < 10; j++) { const xx = x + rnd() * w; c.beginPath(); c.moveTo(xx, 110); c.lineTo(xx + between(-3, 3), 340); c.stroke(); }
+      }
+      c.fillStyle = "#3d5a80"; c.fillRect(0, 330, W, 60);
+      c.fillStyle = "rgba(255,255,255,.75)"; for (let i = 0; i < 60; i++) { c.beginPath(); c.arc(rnd() * W, 320 + rnd() * 50, between(10, 30), 0, 7); c.fill(); }
+      c.lineWidth = 7; ["#e63946", "#f4a261", "#ffd23f", "#06d6a0", "#3a86ff", "#8338ec"].forEach((col, i) => {
+        c.strokeStyle = col; c.globalAlpha = .45; c.beginPath(); c.arc(820, 420, 300 - i * 8, Math.PI * 1.12, Math.PI * 1.55); c.stroke();
+      }); c.globalAlpha = 1;
+      c.fillStyle = "#b08968"; c.fillRect(0, 390, W, H - 390);
+      c.strokeStyle = "#8b5e34"; c.lineWidth = 2; for (let y = 400; y < H; y += 22) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+      c.fillStyle = "#6f4518"; c.fillRect(0, 386, W, 8); for (let x = 0; x < W; x += 60) c.fillRect(x, 366, 6, 26);
+      label(c, "GARGANTA DO DIABO →", 1040, 362, 14, "#fff", "#141414");
+    },
+  },
+  {
+    name: "Ponte da Fraternidade", tag: "A fronteira", pool: ["andino", "portenho", "hippie", "cowboy", "rasta"],
+    intro: "Na ponte entre Brasil e Argentina, no meio dos torcedores. A Argentina diz que não tem registro de entrada.",
+    zone: [60, 1140, 380, 700], count: 185, jersey: true, p: { suit: .15, bag: .4, disg: .13 },
+    bg(c) {
+      sky(c, 300, "#ffcf99", "#ffe8cc");
+      c.fillStyle = "#ffb703"; c.beginPath(); c.arc(980, 150, 60, 0, 7); c.fill();
+      c.fillStyle = "#40916c"; c.fillRect(0, 220, W, 80);
+      c.fillStyle = "#5e8fb0"; c.fillRect(0, 280, W, 60);
+      c.fillStyle = "#adb5bd"; c.fillRect(0, 330, W, H - 330);
+      c.fillStyle = "#ced4da"; for (let x = 0; x < W; x += 120) c.fillRect(x, 520, 60, 6);
+      for (let x = 0; x < W; x += 14) {
+        const br = x < W / 2, alt = Math.floor(x / 14) % 2;
+        c.fillStyle = br ? (alt ? "#1b9e5a" : "#ffd23f") : (alt ? "#74acdf" : "#ffffff");
+        c.fillRect(x, 300, 10, 40);
+      }
+      c.fillStyle = "#14213d"; c.fillRect(0, 296, W, 6); c.fillRect(W / 2 - 3, 270, 6, 70);
+      label(c, "← BRASIL", 300, 262, 18, "#141414", "#ffd23f");
+      label(c, "ARGENTINA →", 900, 262, 18, "#141414", "#ffffff");
+      c.fillStyle = "#e9ecef"; c.fillRect(440, 340, 320, 46); c.fillStyle = "#c8102e"; c.fillRect(440, 340, 320, 10);
+      label(c, "ADUANA · ALFÂNDEGA", 600, 368, 16, "#141414");
+      [["#e63946", 70], ["#3a86ff", 180], ["#ffd23f", 980], ["#ffffff", 1090]].forEach(([col, x]) => {
+        c.fillStyle = col; rr(c, x, 352, 80, 26, 6); c.fill(); c.fillStyle = "#8ecae6"; c.fillRect(x + 16, 356, 40, 9); c.fillStyle = "#222"; c.beginPath(); c.arc(x + 16, 378, 6, 0, 7); c.arc(x + 64, 378, 6, 0, 7); c.fill();
+      });
+      label(c, "SEM REGISTRO DE ENTRADA", 600, 690, 14, "#fff", "#c8102e");
+    },
+  },
+  {
+    name: "Desembarque nos EUA", tag: "Fase final", pool: ["loiro", "careca", "professor"], twist: true,
+    intro: "Se ele saiu mesmo, deve ter chegado aqui. Última chance de encontrar o Flávio.",
+    zone: [40, 1160, 360, 700], count: 165, p: { suit: .15, bag: .6, disg: .12 },
+    bg(c) {
+      c.fillStyle = "#dee2e6"; c.fillRect(0, 0, W, 300);
+      c.fillStyle = "#8ecae6"; for (let x = 40; x < W; x += 190) c.fillRect(x, 50, 150, 170);
+      for (let x = 115; x < W; x += 380) palm(c, x, 220, .9);
+      c.fillStyle = "#adb5bd"; for (let x = 40; x < W; x += 190) c.fillRect(x + 72, 50, 6, 170);
+      label(c, "ARRIVALS · CHEGADAS", 600, 30, 20, "#ffd23f", "#141414");
+      c.fillStyle = "#f1f3f5"; c.fillRect(0, 300, W, H - 300);
+      c.strokeStyle = "#ced4da"; c.lineWidth = 1;
+      for (let x = 0; x < W; x += 60) { c.beginPath(); c.moveTo(x, 300); c.lineTo(x, H); c.stroke(); }
+      for (let y = 300; y < H; y += 40) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+      c.fillStyle = "#495057"; rr(c, 760, 250, 400, 60, 30); c.fill(); c.fillStyle = "#6c757d"; rr(c, 775, 260, 370, 40, 20); c.fill();
+      for (let x = 790; x < 1130; x += 42) { c.fillStyle = pick(BAGS); rr(c, x, 262, 30, 22, 4); c.fill(); }
+      label(c, "ESTEIRA 2 · VOO PARTICULAR", 960, 236, 13, "#fff", "#c8102e");
+      label(c, "WELCOME!", 300, 270, 22, "#141414", "#ffffff");
+    },
+  },
+];
+
+const MISS_LINES = ["Era só um turista!", "Esse é um sósia.", "Esse tá de férias mesmo.", "Nada. Só um assessor.", "Quase! É o tio do pastel.", "Esse é um influencer.", "Não é ele. Mas parece."];
+const FOUND_LINES = ["Achou! Ou alguém muito parecido.", "Achou! Ele jura que está só de passagem.", "Achou! Mas ele diz que é fake."];
+
+/* ---------- multidão ---------- */
+function randomPerson(lv, d) {
+  let p = { skin: pick(SKINS), hairc: pick(HAIRS), hairStyle: rnd() < .15 ? pick(["long", "curly", "bald"]) : "short", shirt: pick(lv.ponchos ? SHIRTS : SHIRTS), pants: pick(PANTS) };
+  if (rnd() < .25) { p.hat = pick(["cap", "sun", "beanie"]); p.hatc = pick(SHIRTS); }
+  if (rnd() < .25) p.glasses = pick(["dark", "clear"]);
+  if (rnd() < lv.p.disg) { p = Object.assign(p, d.set); p.suit = null; p.tie = null; p.skin = pick(SKINS); }
+  if (rnd() < lv.p.suit) { p.suit = NAVY; p.tie = pick(["#9b2226", "#264653", null]); }
+  if (rnd() < lv.p.bag) p.bag = rnd() < .35 ? BROWN : pick(BAGS);
+  if (lv.ponchos && rnd() < .6) { p.poncho = pick(["#ffd23f", "#ffd23f", "#3a86ff", "#e63946"]); if (rnd() < .5) { p.hat = "hood"; p.hatc = p.poncho; } }
+  if (lv.jersey && rnd() < .35) { p.shirt = "#ffd23f"; p.jersey = true; if (p.suit) p.suit = null; }
+  // ninguém além do Flávio junta disfarce + terno azul-marinho + mala marrom
+  const hasDisg = d.set.hat ? p.hat === d.set.hat : (d.set.hairStyle ? p.hairStyle === d.set.hairStyle : p.face === d.set.face);
+  if (hasDisg && p.suit === NAVY && p.bag === BROWN) p.bag = "#2b2d42";
+  return p;
+}
+
+const scene = $("scene"), sc = scene.getContext("2d");
+const off = document.createElement("canvas"); off.width = W; off.height = H;
+const oc = off.getContext("2d");
+let game = null;
+
+function newGame() {
+  rnd = mulberry((Date.now() * 9301) & 0x7fffffff);
+  game = { level: 0, total: 0, misses: 0, hints: 0, state: "intro", t0: 0, elapsed: 0, penalty: 0, marks: [], floats: [], hint: null, hero: null,
+    disg: LEVELS.map((l) => pick(l.pool)) };
+  buildScene(); renderLevels(); showIntro(); $("results").hidden = true;
+}
+
+function buildScene() {
+  const lv = LEVELS[game.level], d = byId(game.disg[game.level]);
+  const [x0, x1, y0, y1] = lv.zone;
+  const scaleAt = (y) => .78 + .6 * (y - y0) / (y1 - y0);
+  if (!game.hero || game.hero.level !== game.level) {
+    const hy = between(y0 + 40, y1 - 20);
+    game.hero = flavioWith(d, { x: between(x0 + 80, x1 - 80), y: hy, s: scaleAt(hy), level: game.level, cutout: !!lv.twist, suit: NAVY, bag: BROWN, poncho: d.set.poncho });
+    if (!game.hero.tie) game.hero.tie = GOLD_TIE;
+  }
+  const h = game.hero;
+  const people = [];
+  for (let i = 0; i < lv.count; i++) {
+    const p = randomPerson(lv, d); p.x = between(x0, x1); p.y = between(y0, y1); p.s = scaleAt(p.y);
+    if (!(Math.abs(p.x - h.x) < 32 * h.s && p.y > h.y - 6 && p.y - h.y < 66 * h.s)) people.push(p);
+  }
+  people.push(h); people.sort((a, b) => a.y - b.y);
+  oc.clearRect(0, 0, W, H);
+  lv.bg(oc);
+  people.forEach((p) => drawPerson(oc, p));
+  drawClue(); markCurrent();
+  render();
+}
+
+function drawClue() {
+  if (!game) return;
+  const d = byId(game.disg[Math.min(game.level, LEVELS.length - 1)]);
+  drawPortrait($("clueCanvas"), d);
+  $("clueName").textContent = d.nome.toLowerCase();
+}
+
+function render() {
+  sc.drawImage(off, 0, 0);
+  if (!game) return;
+  game.marks.forEach((m) => {
+    sc.strokeStyle = "#c8102e"; sc.lineWidth = 4; sc.lineCap = "round";
+    sc.beginPath(); sc.moveTo(m.x - 9, m.y - 9); sc.lineTo(m.x + 9, m.y + 9); sc.moveTo(m.x + 9, m.y - 9); sc.lineTo(m.x - 9, m.y + 9); sc.stroke();
+  });
+  const now = performance.now();
+  if (game.hint && now < game.hint.until) {
+    sc.save(); sc.strokeStyle = "#ffd23f"; sc.lineWidth = 5; sc.setLineDash([14, 10]);
+    sc.lineDashOffset = -now / 30; sc.beginPath(); sc.arc(game.hint.x, game.hint.y, 150, 0, 7); sc.stroke(); sc.restore();
+  }
+  game.floats = game.floats.filter((f) => now - f.t < 1300);
+  game.floats.forEach((f) => {
+    const k = (now - f.t) / 1300;
+    sc.globalAlpha = 1 - k; sc.font = "700 24px Oswald, Impact, sans-serif"; sc.textAlign = "center";
+    sc.lineWidth = 5; sc.strokeStyle = "#141414"; sc.strokeText(f.txt.toUpperCase(), f.x, f.y - 30 - k * 40);
+    sc.fillStyle = "#ffd23f"; sc.fillText(f.txt.toUpperCase(), f.x, f.y - 30 - k * 40); sc.globalAlpha = 1;
+  });
+  if (game.state === "found" || game.state === "done") {
+    const h = game.hero;
+    sc.strokeStyle = "#c8102e"; sc.lineWidth = 6; sc.setLineDash([]);
+    sc.beginPath(); sc.arc(h.x, h.y - 30 * h.s, 48 * h.s, 0, 7); sc.stroke();
+  }
+}
+
+function loop() {
+  if (game && game.state === "play") {
+    game.elapsed = (performance.now() - game.t0) / 1000 + game.penalty;
+    $("hudTime").textContent = game.elapsed.toFixed(1).replace(".", ",") + "s";
+  }
+  render();
+  requestAnimationFrame(loop);
+}
+
+function renderLevels() {
+  $("levels").innerHTML = LEVELS.map((l, i) =>
+    `<span class="lvl ${i < game.level ? "done" : i === game.level ? "on" : ""}">${i + 1} · ${l.name}</span>`).join("");
+  $("hudPlace").textContent = `Fase ${game.level + 1} · ${LEVELS[game.level].name}`;
+  $("hudMiss").textContent = game.misses;
+}
+
+function showPanel(html) { $("panel").innerHTML = html; $("overlay").hidden = false; }
+function hidePanel() { $("overlay").hidden = true; }
+
+function showIntro() {
+  const lv = LEVELS[game.level], d = byId(game.disg[game.level]);
+  game.state = "intro"; $("hintBtn").disabled = true; $("hudTime").textContent = "0,0s";
+  showPanel(`<div class="kicker">Fase ${game.level + 1} de ${LEVELS.length} · ${lv.tag}</div>
+    <h4>${lv.name}</h4>
+    <canvas id="panelPortrait" width="220" height="238" aria-hidden="true"></canvas>
+    <p>${lv.intro} Disfarce provável: <b>${d.nome.toLowerCase()}</b>, de terno azul-marinho e mala marrom.</p>
+    <button class="btn" type="button" id="goBtn">Procurar</button>`);
+  drawPortrait($("panelPortrait"), d);
+  $("goBtn").onclick = startLevel;
+}
+
+function startLevel() {
+  hidePanel(); game.state = "play"; game.t0 = performance.now(); game.penalty = 0; game.elapsed = 0;
+  game.marks = []; game.hint = null; $("hintBtn").disabled = false;
+}
+
+function found() {
+  game.state = "found"; $("hintBtn").disabled = true;
+  game.total += game.elapsed;
+  const lv = LEVELS[game.level];
+  const t = game.elapsed.toFixed(1).replace(".", ",");
+  if (lv.twist) {
+    showPanel(`<div class="kicker">Achou em ${t}s… será?</div>
+      <h4>É um papelão!</h4>
+      <p>Alguém deixou um Flávio de papelão no desembarque. O de verdade continua sem paradeiro oficial.</p>
+      <button class="btn" type="button" id="nextBtn">Ver meu resultado</button>`);
+    $("nextBtn").onclick = finish;
+  } else {
+    showPanel(`<div class="kicker">Fase ${game.level + 1} concluída · ${t}s</div>
+      <h4>${pick(FOUND_LINES)}</h4>
+      <p>Antes que alguém confirme, ele já trocou de disfarce.</p>
+      <button class="btn" type="button" id="nextBtn">Próximo cenário →</button>`);
+    $("nextBtn").onclick = () => { game.level++; buildScene(); renderLevels(); showIntro(); };
+  }
+}
+
+function finish() {
+  game.state = "done"; markCurrent();
+  $("levels").querySelectorAll(".lvl").forEach((el) => { el.className = "lvl done"; });
+  $("hudPlace").textContent = "Busca encerrada";
+  const total = Math.round(game.total);
+  let rank = "Assessor que também não sabe onde ele está";
+  if (total < 40) rank = "Faro de perdigueiro";
+  else if (total < 80) rank = "Detetive de aeroporto";
+  else if (total < 150) rank = "Repórter de plantão";
+  $("rank").textContent = rank;
+  $("rTime").textContent = total + "s"; $("rMiss").textContent = game.misses; $("rHint").textContent = game.hints;
+  const nomes = game.disg.map((id) => byId(id).nome.toLowerCase()).join(", ");
+  $("shareText").textContent = `Achei o Flávio disfarçado de ${nomes} em ${total}s (${game.misses} erros). Nível: ${rank}. Paradeiro oficial: desconhecido.`;
+  $("results").hidden = false;
+  showPanel(`<div class="kicker">Fim da busca</div><h4>Paradeiro: desconhecido</h4>
+    <p>Você chegou mais perto do que os aliados.</p>
+    <button class="btn" type="button" id="againPanel">Jogar de novo</button>`);
+  $("againPanel").onclick = newGame;
+  $("results").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+scene.addEventListener("click", (e) => {
+  if (!game || game.state !== "play") return;
+  const r = scene.getBoundingClientRect();
+  const x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
+  const h = game.hero;
+  if (Math.abs(x - h.x) < 22 * h.s && Math.abs(y - (h.y - 32 * h.s)) < 36 * h.s) { found(); return; }
+  game.misses++; game.penalty += 3; $("hudMiss").textContent = game.misses;
+  game.marks.push({ x, y }); game.floats.push({ x, y, txt: pick(MISS_LINES), t: performance.now() });
+});
+
+$("hintBtn").addEventListener("click", () => {
+  if (game.state !== "play") return;
+  game.penalty += 10; game.hints++;
+  const h = game.hero;
+  game.hint = { x: h.x + between(-80, 80), y: h.y - 30 + between(-70, 70), until: performance.now() + 3500 };
+});
+$("againBtn").addEventListener("click", () => { newGame(); $("caderno").scrollIntoView({ behavior: "smooth" }); });
+$("copyBtn").addEventListener("click", () => {
+  const txt = $("shareText").textContent;
+  try { navigator.clipboard.writeText(txt).then(() => toast("Resultado copiado"), selectShare); } catch (err) { selectShare(); }
+});
+function selectShare() {
+  const range = document.createRange(); range.selectNodeContents($("shareText"));
+  const s = getSelection(); s.removeAllRanges(); s.addRange(range); toast("Texto selecionado. Copie com Ctrl/Cmd+C");
+}
+let toastTimer;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2200); }
+
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+  newGame(); drawMural(); requestAnimationFrame(loop);
+});
+</script>

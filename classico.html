@@ -1,0 +1,728 @@
+<title>Onde Está o Flávio?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Figtree:wght@400;600;800&family=IBM+Plex+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: caderno de atividades — cartaz de "procura-se" + jogo de busca em largura total + fichas do dossiê grampeadas */
+:root {
+  --paper: #f3f7fc;
+  --grid: #d5e2f1;
+  --ink: #14213d;
+  --ink-soft: #4a5875;
+  --stamp: #d62839;
+  --hi: #ffd23f;
+  --leaf: #1b9e5a;
+  --card: #ffffff;
+  --f-display: "Bungee", "Arial Black", Impact, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.55;
+}
+a { color: var(--ink); }
+:focus-visible { outline: 3px solid var(--stamp); outline-offset: 3px; }
+
+/* ticker */
+.ticker { background: var(--ink); color: var(--paper); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.ticker-track { display: inline-flex; gap: 48px; padding-block: 8px; animation: tick 40s linear infinite; }
+.ticker-track span::before { content: "● "; color: var(--stamp); }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* hero */
+.hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 40px; align-items: center; padding-block: 48px 32px; }
+.hero > * { min-width: 0; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(48px, 8.4vw, 112px); line-height: .92; margin: 14px 0 20px; text-wrap: balance; letter-spacing: -.01em; }
+h1 .mark { background: linear-gradient(transparent 52%, var(--hi) 52%, var(--hi) 92%, transparent 92%); padding: 0 .06em; }
+.lede { font-size: 19px; max-width: 34em; margin: 0 0 28px; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.btn { font-family: var(--f-display); font-size: 17px; border: 3px solid var(--ink); background: var(--stamp); color: #fff; padding: 14px 24px; border-radius: 999px; cursor: pointer; box-shadow: 4px 4px 0 var(--ink); transition: transform .12s, box-shadow .12s; text-decoration: none; display: inline-block; }
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.btn.ghost { background: var(--card); color: var(--ink); }
+.btn.small { font-size: 13px; padding: 8px 14px; box-shadow: 3px 3px 0 var(--ink); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; }
+.watch { font-family: var(--f-mono); font-size: 13px; color: var(--ink-soft); }
+.watch b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* poster */
+.poster { background: var(--card); border: 3px solid var(--ink); padding: 22px; transform: rotate(1.6deg); box-shadow: 8px 8px 0 var(--ink); position: relative; max-width: 440px; justify-self: center; width: 100%; }
+.poster::before { content: ""; position: absolute; top: -14px; left: 50%; width: 90px; height: 26px; margin-left: -45px; background: rgba(255, 210, 63, .8); transform: rotate(-3deg); }
+.poster h2 { font-family: var(--f-display); font-weight: 400; font-size: 34px; margin: 0; text-align: center; line-height: 1; }
+.poster .sub { text-align: center; font-family: var(--f-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 6px 0 10px; }
+.poster canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 4 / 3; background: repeating-linear-gradient(45deg, #fff6d1 0 14px, #fff0b8 14px 28px); border: 2px solid var(--ink); }
+.facts { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 6px; font-size: 14px; }
+.facts li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--grid); padding-bottom: 6px; }
+.facts li span:first-child { font-family: var(--f-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); padding-top: 2px; }
+.facts li span:last-child { font-weight: 800; text-align: right; }
+.stampmark { position: absolute; right: -12px; bottom: 74px; font-family: var(--f-display); color: var(--stamp); border: 3px solid var(--stamp); padding: 4px 10px; transform: rotate(-14deg); font-size: 18px; background: rgba(255,255,255,.85); }
+
+/* game */
+.section-title { font-family: var(--f-display); font-weight: 400; font-size: clamp(30px, 4.4vw, 48px); margin: 0; line-height: 1.05; text-wrap: balance; }
+.game { padding-block: 40px 24px; }
+.game-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 16px; }
+.levels { display: flex; gap: 8px; flex-wrap: wrap; }
+.lvl { font-family: var(--f-mono); font-size: 12px; font-weight: 700; padding: 6px 10px; border: 2px solid var(--ink); border-radius: 999px; background: var(--card); color: var(--ink-soft); }
+.lvl.on { background: var(--hi); color: var(--ink); }
+.lvl.done { background: var(--leaf); color: #fff; border-color: var(--leaf); }
+.hud { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--ink); color: var(--paper); padding: 10px 14px; border: 3px solid var(--ink); border-bottom: 0; }
+.hud .cell { font-family: var(--f-mono); font-size: 13px; display: flex; gap: 6px; align-items: baseline; }
+.hud .cell b { font-size: 18px; color: var(--hi); font-variant-numeric: tabular-nums; }
+.hud .place { font-family: var(--f-display); font-size: 16px; margin-right: auto; }
+.hud .btn.small { background: var(--paper); color: var(--ink); border-color: var(--paper); box-shadow: none; }
+.clues { display: flex; flex-wrap: wrap; gap: 8px; background: var(--hi); border: 3px solid var(--ink); border-bottom: 0; padding: 8px 14px; font-size: 14px; font-weight: 600; align-items: center; }
+.clues .chip { background: var(--card); border: 2px solid var(--ink); border-radius: 999px; padding: 2px 10px; font-size: 13px; }
+.stage-scroll { overflow-x: auto; border: 3px solid var(--ink); background: var(--ink); box-shadow: 8px 8px 0 var(--ink); }
+.stage { position: relative; min-width: 900px; }
+.stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 720; cursor: crosshair; }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(20, 33, 61, .55); padding: 20px; }
+.panel { background: var(--card); border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); padding: 26px 28px; max-width: 460px; text-align: center; }
+.panel .eyebrow { color: var(--stamp); }
+.panel h3 { font-family: var(--f-display); font-weight: 400; font-size: 30px; margin: 8px 0 10px; line-height: 1.05; text-wrap: balance; }
+.panel p { margin: 0 0 18px; }
+.panel .btn + .btn { margin-left: 8px; }
+.scroll-hint { display: none; font-family: var(--f-mono); font-size: 12px; color: var(--ink-soft); margin-top: 14px; }
+@media (max-width: 940px) { .scroll-hint { display: block; } }
+
+/* results */
+.results { margin-top: 28px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; background: var(--card); border: 3px solid var(--ink); padding: 22px; box-shadow: 8px 8px 0 var(--ink); }
+.results > * { min-width: 0; }
+.rank { font-family: var(--f-display); font-size: 26px; line-height: 1.05; }
+.scoreline { display: flex; gap: 20px; flex-wrap: wrap; font-family: var(--f-mono); font-size: 13px; color: var(--ink-soft); margin: 8px 0 12px; }
+.scoreline b { color: var(--ink); font-size: 22px; display: block; font-variant-numeric: tabular-nums; }
+.share { font-family: var(--f-mono); font-size: 13px; background: var(--paper); border: 2px dashed var(--ink-soft); padding: 10px; margin: 0 0 12px; user-select: all; }
+.big-q { font-family: var(--f-display); font-size: 84px; line-height: 1; color: var(--stamp); }
+
+/* dossier */
+.dossier { padding-block: 56px 32px; }
+.dossier .lede { margin-top: 10px; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-top: 26px; }
+.ficha { background: var(--card); border: 2px solid var(--ink); padding: 18px 18px 16px; position: relative; display: flex; flex-direction: column; gap: 8px; }
+.ficha:nth-child(odd) { transform: rotate(-.6deg); }
+.ficha:nth-child(even) { transform: rotate(.5deg); }
+.ficha::before { content: ""; position: absolute; top: -8px; left: 22px; width: 30px; height: 14px; border: 2px solid var(--ink-soft); border-bottom: 0; border-radius: 4px 4px 0 0; }
+.ficha .src { font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--stamp); font-weight: 700; }
+.ficha h3 { font-size: 18px; line-height: 1.25; margin: 0; font-weight: 800; text-wrap: balance; }
+.ficha p { margin: 0; font-size: 14px; color: var(--ink-soft); }
+.ficha a { margin-top: auto; font-family: var(--f-mono); font-size: 12px; font-weight: 700; }
+
+footer { padding-block: 24px 48px; font-size: 13px; color: var(--ink-soft); }
+footer .disc { border-top: 3px solid var(--ink); padding-top: 16px; max-width: 70ch; }
+
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); font-family: var(--f-mono); font-size: 13px; padding: 10px 16px; border-radius: 999px; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; padding-block: 32px 16px; }
+  .poster { transform: rotate(1deg); }
+  .cards { grid-template-columns: 1fr; }
+  .results { grid-template-columns: 1fr; text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
+  .btn { transition: none; }
+}
+</style>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="ticker"></div>
+</div>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Livro de atividades · Edição pós-2º turno · 2026</div>
+      <h1>Onde está o <span class="mark">Flávio?</span></h1>
+      <p class="lede">Ele perdeu o 2º turno, não entregou os passaportes no prazo e virou o paradeiro mais procurado do Google. Nem os aliados sabem dizer onde ele está. Ajude a procurar em quatro cenários.</p>
+      <div class="cta-row">
+        <a class="btn" href="#jogo" id="heroStart">Começar a busca</a>
+        <a class="btn ghost" href="#dossie">Ver as pistas</a>
+      </div>
+      <p class="watch">Você está nesta página há <b id="since">00:00</b> e ainda não achou ele.</p>
+    </div>
+
+    <aside class="poster" aria-label="Cartaz de procura-se">
+      <h2>PROCURA-SE</h2>
+      <div class="sub">por jornalistas, PF e aliados</div>
+      <canvas id="posterCanvas" width="400" height="300" aria-label="Ilustração do personagem Flávio"></canvas>
+      <ul class="facts">
+        <li><span>Paradeiro oficial</span><span>desconhecido</span></li>
+        <li><span>Passaportes</span><span>cancelados</span></li>
+        <li><span>Jatinho</span><span>parado em Puerto Iguazú*</span></li>
+        <li><span>Aliados</span><span>“Não saiu”</span></li>
+      </ul>
+      <div class="stampmark">INCOMUNICÁVEL</div>
+    </aside>
+  </header>
+
+  <section class="game" id="jogo" aria-labelledby="gameTitle">
+    <div class="game-head">
+      <div>
+        <div class="eyebrow">O jogo</div>
+        <h2 class="section-title" id="gameTitle">Ache o Flávio na multidão</h2>
+      </div>
+      <div class="levels" id="levels"></div>
+    </div>
+
+    <div class="hud">
+      <div class="place" id="hudPlace">Fase 1 · Puerto Iguazú</div>
+      <div class="cell">tempo <b id="hudTime">0,0s</b></div>
+      <div class="cell">erros <b id="hudMiss">0</b></div>
+      <button class="btn small" id="hintBtn" type="button" disabled>Dica (+10s)</button>
+    </div>
+    <div class="clues">
+      <span>Como reconhecer:</span>
+      <span class="chip">🕶️ óculos escuros</span>
+      <span class="chip">🤵 terno azul-marinho</span>
+      <span class="chip">🎗️ faixa verde-amarela (a que ele não ganhou)</span>
+      <span class="chip">🧳 mala marrom</span>
+    </div>
+    <div class="stage-scroll">
+      <div class="stage">
+        <canvas id="scene" width="1200" height="720" aria-label="Cena ilustrada com uma multidão onde o Flávio está escondido"></canvas>
+        <div class="overlay" id="overlay">
+          <div class="panel" id="panel"></div>
+        </div>
+      </div>
+    </div>
+    <p class="scroll-hint">Arraste a cena para os lados para ver tudo.</p>
+
+    <div class="results" id="results" hidden>
+      <div class="big-q">?</div>
+      <div>
+        <div class="eyebrow">Resultado da sua investigação</div>
+        <div class="rank" id="rank"></div>
+        <div class="scoreline">
+          <div>tempo total<b id="rTime">0s</b></div>
+          <div>cliques errados<b id="rMiss">0</b></div>
+          <div>dicas<b id="rHint">0</b></div>
+        </div>
+        <p class="share" id="shareText"></p>
+        <div class="cta-row">
+          <button class="btn small" id="copyBtn" type="button">Copiar resultado</button>
+          <button class="btn small ghost" id="againBtn" type="button">Procurar de novo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dossier" id="dossie" aria-labelledby="dosTitle">
+    <div class="eyebrow">O dossiê</div>
+    <h2 class="section-title" id="dosTitle">As pistas (de verdade)</h2>
+    <p class="lede">O que a imprensa publicou em 27 de outubro de 2026. As versões se contradizem, e até agora ninguém confirmou oficialmente onde ele está.</p>
+    <div class="cards">
+      <article class="ficha">
+        <div class="src">O Bastidor</div>
+        <h3>Prazo de 24h para entregar os passaportes venceu</h3>
+        <p>Como ele não entregou os documentos e há relatos de que foi visto na Argentina, passou a ser tratado como foragido.</p>
+        <a href="https://obastidor.com.br/justica/o-fugitivo/" target="_blank" rel="noopener">Ler a matéria ↗</a>
+      </article>
+      <article class="ficha">
+        <div class="src">Revista Fórum · via Infobae</div>
+        <h3>Um Gulfstream G400 em Puerto Iguazú</h3>
+        <p>Segundo o site argentino, o jatinho sairia de lá com quatro passageiros rumo aos EUA. Nada comprova que o senador estava a bordo.</p>
+        <a href="https://revistaforum.com.br/politica/site-argentino-diz-que-flavio-bolsonaro-teria-fugido-para-os-eua-de-jatinho-apos-atravessar-fronteira/" target="_blank" rel="noopener">Ler a matéria ↗</a>
+      </article>
+      <article class="ficha">
+        <div class="src">Nexo Jornal</div>
+        <h3>Argentina diz que não há registro de entrada</h3>
+        <p>Não há registro oficial de que ele tenha cruzado a fronteira, e o senador está incomunicável.</p>
+        <a href="https://www.nexojornal.com.br/expresso/2026/10/27/flavio-bolsonaro-fugiu-argentina-pf-passaporte" target="_blank" rel="noopener">Ler a matéria ↗</a>
+      </article>
+      <article class="ficha">
+        <div class="src">Novo Notícias</div>
+        <h3>Avião tem voo barrado na Argentina</h3>
+        <p>O jato citado nos relatos foi impedido de decolar. Aliados próximos dizem não saber onde ele está.</p>
+        <a href="https://novonoticias.com.br/onde-esta-flavio-bolsonaro-aliados-dizem-nao-saber-aviao-tem-voo-barrado-na-argentina/" target="_blank" rel="noopener">Ler a matéria ↗</a>
+      </article>
+      <article class="ficha">
+        <div class="src">Revista Fórum</div>
+        <h3>Flávio nega que pretendia fugir</h3>
+        <p>Ele diz que a decisão de Moraes foi motivada por declarações do irmão. Aliados chamaram a notícia de “fake” e disseram “não saiu”.</p>
+        <a href="https://revistaforum.com.br/politica/site-argentino-diz-que-flavio-bolsonaro-teria-fugido-para-os-eua-de-jatinho-apos-atravessar-fronteira/" target="_blank" rel="noopener">Ler a matéria ↗</a>
+      </article>
+      <article class="ficha">
+        <div class="src">Poder360</div>
+        <h3>“Onde está Flávio?” dispara no Google</h3>
+        <p>As buscas por “Onde está Flávio?” e “Flávio fugiu” tiveram pico. Esta página é a nossa contribuição.</p>
+        <a href="https://www.poder360.com.br/poder-eleicoes-2026/onde-esta-flavio-e-flavio-fugiu-tem-pico-nas-buscas-no-google/" target="_blank" rel="noopener">Ler a matéria ↗</a>
+      </article>
+    </div>
+  </section>
+
+  <footer>
+    <p class="disc"><b>Isto é sátira.</b> Os cenários, o personagem e o jogo são ficção humorística. As informações do dossiê vêm das matérias linkadas e, até a publicação, não havia confirmação oficial do paradeiro do senador. *Segundo relatos da imprensa.</p>
+  </footer>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ------------------------------------------------------------------
+   PERSONAGEM: quando a arte do Flávio chegar, coloque o caminho ou
+   data: URI aqui. Enquanto estiver vazio, o boneco placeholder
+   desenhado no canvas é usado.
+------------------------------------------------------------------- */
+const FLAVIO_IMG_SRC = "";
+
+const W = 1200, H = 720;
+const $ = (id) => document.getElementById(id);
+
+/* ---------- utilidades ---------- */
+function mulberry(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+let rnd = mulberry(Date.now() & 0xffff);
+const pick = (a) => a[Math.floor(rnd() * a.length)];
+const between = (a, b) => a + rnd() * (b - a);
+
+function rr(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r);
+  c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r);
+  c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y);
+  c.closePath();
+}
+function poly(c, pts, fill) {
+  c.beginPath(); c.moveTo(pts[0], pts[1]);
+  for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]);
+  c.closePath(); c.fillStyle = fill; c.fill();
+}
+
+/* ---------- personagens ---------- */
+const SKINS = ["#f1c27d", "#e0ac69", "#c68642", "#8d5524", "#ffdbac", "#a5694f"];
+const HAIRS = ["#2b1d14", "#3b2a1f", "#6b4423", "#a0522d", "#d9b26f", "#111", "#888"];
+const SHIRTS = ["#e63946", "#f4a261", "#2a9d8f", "#e9c46a", "#8338ec", "#3a86ff", "#ff006e", "#06d6a0", "#ffffff", "#adb5bd", "#fb8500", "#6a994e", "#ffb4a2"];
+const PANTS = ["#264653", "#3d405b", "#6c584c", "#22223b", "#a3b18a", "#577590", "#1d3557"];
+const BAGS = ["#7a4a24", "#7a4a24", "#2b2d42", "#e63946", "#457b9d", "#adb5bd", "#9c6644"];
+const FLAG_SASH = ["#1b9e5a", "#ffd23f"];
+const OTHER_SASH = [["#e63946", "#ffffff"], ["#3a86ff", "#ffffff"], ["#1b9e5a", "#ffffff"], ["#ffd23f", "#3a86ff"]];
+
+const FLAVIO = { skin: "#f1c27d", hair: "#3b2a1f", pants: "#1f2a44", suit: true, sash: FLAG_SASH, glasses: true, bag: "#7a4a24", hero: true };
+
+let flavioImg = null;
+if (FLAVIO_IMG_SRC) {
+  const im = new Image();
+  im.onload = () => { flavioImg = im; drawPoster(); if (game) buildScene(); };
+  im.src = FLAVIO_IMG_SRC;
+}
+
+function drawPerson(c, p) {
+  const s = p.s;
+  c.save(); c.translate(p.x, p.y); c.scale(s, s);
+  c.fillStyle = "rgba(0,0,0,.18)";
+  c.beginPath(); c.ellipse(0, 0, 12, 3.5, 0, 0, Math.PI * 2); c.fill();
+
+  if (p.hero && flavioImg) {
+    const h = 62, w = h * flavioImg.width / flavioImg.height;
+    c.drawImage(flavioImg, -w / 2, -h, w, h);
+    if (p.cutout) drawCutoutStand(c);
+    c.restore(); return;
+  }
+  if (p.cutout) drawCutoutStand(c);
+
+  // mala (atrás)
+  if (p.bag) {
+    c.strokeStyle = "#111"; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(14, -22); c.lineTo(14, -28); c.lineTo(19, -28); c.lineTo(19, -22); c.stroke();
+    c.fillStyle = p.bag; rr(c, 10, -22, 13, 17, 2); c.fill();
+    c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(10, -15, 13, 2);
+    c.fillStyle = "#111"; c.beginPath(); c.arc(12.5, -4, 1.6, 0, 7); c.arc(20.5, -4, 1.6, 0, 7); c.fill();
+  }
+  // pernas e sapatos
+  c.fillStyle = p.pants; c.fillRect(-6, -19, 5, 17); c.fillRect(1, -19, 5, 17);
+  c.fillStyle = "#1a1a1a"; c.fillRect(-7, -3, 6, 3); c.fillRect(1, -3, 6, 3);
+  // tronco
+  const top = p.suit ? "#1f2a44" : p.shirt;
+  c.fillStyle = top; rr(c, -8.5, -39, 17, 22, 4); c.fill();
+  c.fillRect(-12, -37, 4, 15); c.fillRect(8, -37, 4, 15);
+  c.fillStyle = p.skin; c.beginPath(); c.arc(-10, -21, 2.4, 0, 7); c.arc(10, -21, 2.4, 0, 7); c.fill();
+  if (p.suit) { poly(c, [-3.5, -39, 3.5, -39, 0, -31], "#fff"); poly(c, [-1, -35, 1, -35, 1.2, -27, 0, -25, -1.2, -27], "#9b2226"); }
+  if (p.jersey) { c.fillStyle = "#1b9e5a"; c.fillRect(-8.5, -39, 17, 2.5); }
+  // faixa
+  if (p.sash) {
+    c.save(); rr(c, -8.5, -39, 17, 22, 4); c.clip();
+    poly(c, [-9, -40, -4, -40, 9, -23, 9, -18], p.sash[0]);
+    poly(c, [-4, -40, -1, -40, 9, -26, 9, -23], p.sash[1]);
+    c.restore();
+  }
+  // capa de chuva (translúcida)
+  if (p.poncho) {
+    c.globalAlpha = .55; poly(c, [-14, -18, 14, -18, 0, -50], p.poncho); c.globalAlpha = 1;
+  }
+  // cabeça
+  c.fillStyle = p.skin; c.beginPath(); c.arc(0, -46, 7, 0, Math.PI * 2); c.fill();
+  c.fillStyle = p.hair; c.beginPath(); c.arc(0, -47, 7.4, Math.PI * 1.02, Math.PI * 1.98); c.closePath(); c.fill();
+  if (p.glasses) {
+    c.fillStyle = "#0b0b0b"; rr(c, -6.2, -48, 5.2, 3.4, 1); c.fill(); rr(c, 1, -48, 5.2, 3.4, 1); c.fill(); c.fillRect(-1.2, -47, 2.4, 1);
+  } else {
+    c.fillStyle = "#1a1a1a"; c.beginPath(); c.arc(-2.5, -46.2, .9, 0, 7); c.arc(2.5, -46.2, .9, 0, 7); c.fill();
+  }
+  c.strokeStyle = "rgba(0,0,0,.45)"; c.lineWidth = .9; c.beginPath(); c.arc(0, -43.5, 2.2, .2, Math.PI - .2); c.stroke();
+  // chapéu
+  if (p.hat === "cap") {
+    c.fillStyle = p.hatc; c.beginPath(); c.arc(0, -49, 7.4, Math.PI, 0); c.fill(); c.fillRect(0, -50, 11, 2.2);
+  } else if (p.hat === "sun") {
+    c.fillStyle = p.hatc; c.beginPath(); c.ellipse(0, -51, 12, 2.6, 0, 0, 7); c.fill(); rr(c, -6, -58, 12, 7, 2); c.fill();
+  }
+  c.restore();
+}
+function drawCutoutStand(c) {
+  c.fillStyle = "#b08968"; poly(c, [6, -2, 16, -2, 4, -40], "#b08968");
+  c.strokeStyle = "#fff"; c.lineWidth = 3; c.setLineDash([]); c.strokeRect(-14, -58, 28, 58);
+}
+
+function randomPerson(lv) {
+  const p = {
+    skin: pick(SKINS), hair: pick(HAIRS), shirt: pick(lv.shirts || SHIRTS), pants: pick(PANTS),
+    suit: rnd() < lv.p.suit, glasses: rnd() < lv.p.glasses, bag: rnd() < lv.p.bag ? pick(BAGS) : null,
+    sash: rnd() < lv.p.sash ? (rnd() < .6 ? FLAG_SASH : pick(OTHER_SASH)) : null,
+  };
+  if (rnd() < .3) { p.hat = pick(["cap", "sun"]); p.hatc = pick(SHIRTS); }
+  if (lv.ponchos && rnd() < .6) p.poncho = pick(["#ffd23f", "#3a86ff", "#e63946", "#06d6a0"]);
+  if (lv.jersey && rnd() < .35) { p.shirt = "#ffd23f"; p.jersey = true; }
+  // ninguém além do Flávio pode ter os 4 traços
+  if (p.suit && p.glasses && p.sash === FLAG_SASH && p.bag === "#7a4a24") {
+    const k = pick(["suit", "glasses", "sash", "bag"]); p[k] = k === "bag" ? "#2b2d42" : false;
+  }
+  return p;
+}
+
+/* ---------- cenários ---------- */
+function sky(c, y, a, b) { const g = c.createLinearGradient(0, 0, 0, y); g.addColorStop(0, a); g.addColorStop(1, b); c.fillStyle = g; c.fillRect(0, 0, W, y); }
+function label(c, txt, x, y, size, color, bg) {
+  c.font = `${size}px Bungee, Impact, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
+  if (bg) { const w = c.measureText(txt).width + size; c.fillStyle = bg; rr(c, x - w / 2, y - size * .8, w, size * 1.6, 4); c.fill(); }
+  c.fillStyle = color; c.fillText(txt, x, y);
+}
+function jet(c, x, y, k, tail, flip) {
+  c.save(); c.translate(x, y); c.scale(flip ? -k : k, k);
+  c.fillStyle = "rgba(0,0,0,.15)"; c.beginPath(); c.ellipse(0, 34, 150, 10, 0, 0, 7); c.fill();
+  poly(c, [-40, 4, 30, 4, -30, 42, -60, 42], "#cfd8e3");
+  c.fillStyle = "#fff"; rr(c, -150, -14, 280, 34, 17); c.fill();
+  poly(c, [100, -12, 150, 2, 130, 20, 100, 20], "#fff");
+  poly(c, [-150, -10, -120, -10, -112, -70, -138, -70], "#fff");
+  poly(c, [-150, -10, -120, -10, -112, -70, -138, -70].map((v, i) => i % 2 ? v : v), "#fff");
+  c.fillStyle = "#1d3557"; c.fillRect(-150, 6, 280, 4);
+  c.fillStyle = "#14213d"; for (let i = -100; i < 80; i += 18) { rr(c, i, -6, 9, 7, 3); c.fill(); }
+  c.fillStyle = "#14213d"; rr(c, 110, -8, 18, 8, 3); c.fill();
+  c.fillStyle = "#333"; c.beginPath(); c.arc(-40, 24, 6, 0, 7); c.arc(90, 24, 5, 0, 7); c.fill();
+  if (tail) { c.save(); if (flip) c.scale(-1, 1); c.font = "13px 'IBM Plex Mono', monospace"; c.fillStyle = "#d62839"; c.textAlign = "center"; c.fillText(tail, flip ? 125 : -125, -38); c.restore(); }
+  c.restore();
+}
+function palm(c, x, y, k) {
+  c.save(); c.translate(x, y); c.scale(k, k);
+  c.strokeStyle = "#8b5e34"; c.lineWidth = 10; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(12, -60, 4, -130); c.stroke();
+  c.fillStyle = "#2d6a4f";
+  for (let i = 0; i < 6; i++) { c.save(); c.translate(4, -130); c.rotate(-2.6 + i * .9); c.beginPath(); c.ellipse(34, 0, 38, 9, 0, 0, 7); c.fill(); c.restore(); }
+  c.restore();
+}
+
+const LEVELS = [
+  {
+    name: "Puerto Iguazú", tag: "A pista do jatinho",
+    intro: "A imprensa argentina diz que um jatinho ficou parado aqui. Será que ele está no meio dos turistas?",
+    zone: [40, 1160, 360, 700], count: 150, p: { suit: .1, glasses: .3, bag: .45, sash: .06 },
+    bg(c) {
+      sky(c, 250, "#8ecae6", "#e0f4ff");
+      c.fillStyle = "#52b788"; for (let i = 0; i < 9; i++) { c.beginPath(); c.ellipse(i * 150, 250, 130, 50, 0, Math.PI, 0); c.fill(); }
+      c.fillStyle = "#e9e4d8"; c.fillRect(60, 140, 560, 110); c.fillStyle = "#c9c1ad"; c.fillRect(60, 140, 560, 14);
+      c.fillStyle = "#8ecae6"; for (let i = 80; i < 600; i += 46) c.fillRect(i, 172, 34, 50);
+      label(c, "AEROPUERTO · PUERTO IGUAZÚ", 340, 120, 22, "#14213d", "#ffd23f");
+      c.fillStyle = "#e9e4d8"; c.fillRect(905, 90, 34, 160); c.fillStyle = "#14213d"; rr(c, 880, 60, 84, 40, 8); c.fill(); c.fillStyle = "#8ecae6"; c.fillRect(888, 68, 68, 22);
+      c.fillStyle = "#8d99ae"; c.fillRect(0, 250, W, H - 250);
+      c.fillStyle = "#ffd23f"; for (let x = 0; x < W; x += 80) c.fillRect(x, 340, 44, 5);
+      c.fillStyle = "#adb5bd"; for (let i = 0; i < 40; i++) c.fillRect(rnd() * W, 260 + rnd() * 460, between(20, 60), 2);
+      jet(c, 830, 300, .9, "LV-FUJ", true);
+      jet(c, 260, 312, .7, "", false);
+      label(c, "PORTÃO 3 · EMBARQUE PRIVADO", 1010, 220, 13, "#fff", "#d62839");
+    },
+  },
+  {
+    name: "Cataratas do Iguaçu", tag: "Todo mundo de capa de chuva",
+    intro: "Metade dos turistas está de capa de chuva. Ótimo lugar para sumir entre a neblina.",
+    zone: [40, 1160, 400, 700], count: 175, ponchos: true, p: { suit: .1, glasses: .35, bag: .3, sash: .08 },
+    bg(c) {
+      sky(c, 120, "#a9def9", "#e4f6ff");
+      c.fillStyle = "#2d6a4f"; c.fillRect(0, 60, W, 270);
+      c.fillStyle = "#1b4332"; for (let i = 0; i < 30; i++) { c.beginPath(); c.arc(rnd() * W, 70 + rnd() * 40, between(30, 60), 0, 7); c.fill(); }
+      for (let i = 0; i < 7; i++) {
+        const x = 40 + i * 170, w = between(90, 140);
+        const g = c.createLinearGradient(0, 110, 0, 330); g.addColorStop(0, "#e0fbfc"); g.addColorStop(1, "#98c1d9");
+        c.fillStyle = g; c.fillRect(x, 110, w, 230);
+        c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2;
+        for (let j = 0; j < 10; j++) { const xx = x + rnd() * w; c.beginPath(); c.moveTo(xx, 110); c.lineTo(xx + between(-3, 3), 340); c.stroke(); }
+      }
+      c.fillStyle = "#3d5a80"; c.fillRect(0, 330, W, 60);
+      c.fillStyle = "rgba(255,255,255,.75)"; for (let i = 0; i < 60; i++) { c.beginPath(); c.arc(rnd() * W, 320 + rnd() * 50, between(10, 30), 0, 7); c.fill(); }
+      c.lineWidth = 7; ["#e63946", "#f4a261", "#ffd23f", "#06d6a0", "#3a86ff", "#8338ec"].forEach((col, i) => {
+        c.strokeStyle = col; c.globalAlpha = .45; c.beginPath(); c.arc(820, 420, 300 - i * 8, Math.PI * 1.12, Math.PI * 1.55); c.stroke();
+      }); c.globalAlpha = 1;
+      c.fillStyle = "#b08968"; c.fillRect(0, 390, W, H - 390);
+      c.strokeStyle = "#8b5e34"; c.lineWidth = 2; for (let y = 400; y < H; y += 22) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+      c.fillStyle = "#6f4518"; c.fillRect(0, 386, W, 8); for (let x = 0; x < W; x += 60) c.fillRect(x, 366, 6, 26);
+      label(c, "GARGANTA DO DIABO →", 1040, 362, 13, "#fff", "#14213d");
+    },
+  },
+  {
+    name: "Ponte da Fraternidade", tag: "A fronteira",
+    intro: "Na ponte entre Brasil e Argentina, cheia de torcedores de amarelo. A Argentina diz que não tem registro de entrada.",
+    zone: [60, 1140, 380, 700], count: 185, jersey: true, p: { suit: .14, glasses: .32, bag: .4, sash: .16 },
+    bg(c) {
+      sky(c, 300, "#ffcf99", "#ffe8cc");
+      c.fillStyle = "#ffb703"; c.beginPath(); c.arc(980, 150, 60, 0, 7); c.fill();
+      c.fillStyle = "#40916c"; c.fillRect(0, 220, W, 80);
+      c.fillStyle = "#5e8fb0"; c.fillRect(0, 280, W, 60);
+      c.fillStyle = "#adb5bd"; c.fillRect(0, 330, W, H - 330);
+      c.fillStyle = "#ced4da"; for (let x = 0; x < W; x += 120) c.fillRect(x, 520, 60, 6);
+      // grade pintada nas cores dos dois países
+      for (let x = 0; x < W; x += 14) {
+        const br = x < W / 2;
+        c.fillStyle = br ? (Math.floor(x / 14) % 2 ? "#1b9e5a" : "#ffd23f") : (Math.floor(x / 14) % 2 ? "#74acdf" : "#ffffff");
+        c.fillRect(x, 300, 10, 40);
+      }
+      c.fillStyle = "#14213d"; c.fillRect(0, 296, W, 6); c.fillRect(W / 2 - 3, 270, 6, 70);
+      label(c, "← BRASIL", 300, 262, 18, "#14213d", "#ffd23f");
+      label(c, "ARGENTINA →", 900, 262, 18, "#14213d", "#ffffff");
+      c.fillStyle = "#e9ecef"; c.fillRect(440, 340, 320, 46); c.fillStyle = "#d62839"; c.fillRect(440, 340, 320, 10);
+      label(c, "ADUANA · ALFÂNDEGA", 600, 368, 15, "#14213d");
+      [["#e63946", 70], ["#3a86ff", 180], ["#ffd23f", 980], ["#ffffff", 1090]].forEach(([col, x]) => {
+        c.fillStyle = col; rr(c, x, 352, 80, 26, 6); c.fill(); c.fillStyle = "#8ecae6"; c.fillRect(x + 16, 356, 40, 9); c.fillStyle = "#222"; c.beginPath(); c.arc(x + 16, 378, 6, 0, 7); c.arc(x + 64, 378, 6, 0, 7); c.fill();
+      });
+      label(c, "SEM REGISTRO DE ENTRADA", 600, 690, 13, "#fff", "#d62839");
+    },
+  },
+  {
+    name: "Desembarque nos EUA", tag: "Fase final",
+    intro: "Se ele saiu mesmo, deve ter chegado aqui. Última chance de encontrar o Flávio.",
+    zone: [40, 1160, 360, 700], count: 165, twist: true, p: { suit: .14, glasses: .4, bag: .6, sash: .08 },
+    bg(c) {
+      c.fillStyle = "#dee2e6"; c.fillRect(0, 0, W, 300);
+      c.fillStyle = "#8ecae6"; for (let x = 40; x < W; x += 190) c.fillRect(x, 50, 150, 170);
+      for (let x = 115; x < W; x += 380) palm(c, x, 220, .9);
+      c.fillStyle = "#adb5bd"; for (let x = 40; x < W; x += 190) { c.fillRect(x + 72, 50, 6, 170); }
+      label(c, "ARRIVALS · CHEGADAS", 600, 30, 20, "#ffd23f", "#14213d");
+      c.fillStyle = "#f1f3f5"; c.fillRect(0, 300, W, H - 300);
+      c.strokeStyle = "#ced4da"; c.lineWidth = 1;
+      for (let x = 0; x < W; x += 60) { c.beginPath(); c.moveTo(x, 300); c.lineTo(x, H); c.stroke(); }
+      for (let y = 300; y < H; y += 40) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+      c.fillStyle = "#495057"; rr(c, 760, 250, 400, 60, 30); c.fill(); c.fillStyle = "#6c757d"; rr(c, 775, 260, 370, 40, 20); c.fill();
+      for (let x = 790; x < 1130; x += 42) { c.fillStyle = pick(BAGS); rr(c, x, 262, 30, 22, 4); c.fill(); }
+      label(c, "ESTEIRA 2 · VOO PARTICULAR", 960, 236, 12, "#fff", "#d62839");
+      label(c, "WELCOME!", 300, 270, 22, "#14213d", "#ffffff");
+    },
+  },
+];
+
+const MISS_LINES = ["Era só um turista!", "Esse é um sósia.", "Esse tá de férias mesmo.", "Nada aqui. Só um assessor.", "Quase! É o tio do pastel.", "Esse é um influencer.", "Não é ele. Mas parece."];
+const FOUND_LINES = ["Achou! Ou pelo menos alguém muito parecido.", "Achou! Ele jura que está só de passagem.", "Achou! Mas ele diz que é fake."];
+
+/* ---------- estado do jogo ---------- */
+const scene = $("scene"), sc = scene.getContext("2d");
+const off = document.createElement("canvas"); off.width = W; off.height = H;
+const oc = off.getContext("2d");
+let game = null;
+
+function newGame() {
+  rnd = mulberry((Date.now() * 9301) & 0x7fffffff);
+  game = { level: 0, total: 0, misses: 0, hints: 0, state: "intro", t0: 0, elapsed: 0, penalty: 0, marks: [], floats: [], hint: null, hero: null };
+  buildScene(); renderLevels(); showIntro(); $("results").hidden = true;
+}
+
+function buildScene() {
+  const lv = LEVELS[game.level];
+  const [x0, x1, y0, y1] = lv.zone;
+  const scaleAt = (y) => .78 + .6 * (y - y0) / (y1 - y0);
+  const people = [];
+  for (let i = 0; i < lv.count; i++) {
+    const p = randomPerson(lv); p.x = between(x0, x1); p.y = between(y0, y1); p.s = scaleAt(p.y); people.push(p);
+  }
+  if (!game.hero || game.hero.level !== game.level) {
+    const hx = between(x0 + 80, x1 - 80), hy = between(y0 + 40, y1 - 20);
+    game.hero = Object.assign({}, FLAVIO, { x: hx, y: hy, s: scaleAt(hy), level: game.level, cutout: !!lv.twist });
+  }
+  const h = game.hero;
+  const crowd = people.filter((p) => !(Math.abs(p.x - h.x) < 30 * h.s && p.y > h.y - 6 && p.y - h.y < 62 * h.s));
+  crowd.push(h); crowd.sort((a, b) => a.y - b.y);
+  oc.clearRect(0, 0, W, H);
+  lv.bg(oc);
+  crowd.forEach((p) => drawPerson(oc, p));
+  render();
+}
+
+function render() {
+  sc.drawImage(off, 0, 0);
+  if (!game) return;
+  game.marks.forEach((m) => {
+    sc.strokeStyle = "#d62839"; sc.lineWidth = 4; sc.lineCap = "round";
+    sc.beginPath(); sc.moveTo(m.x - 9, m.y - 9); sc.lineTo(m.x + 9, m.y + 9); sc.moveTo(m.x + 9, m.y - 9); sc.lineTo(m.x - 9, m.y + 9); sc.stroke();
+  });
+  const now = performance.now();
+  if (game.hint && now < game.hint.until) {
+    sc.save(); sc.strokeStyle = "#ffd23f"; sc.lineWidth = 5; sc.setLineDash([14, 10]);
+    sc.lineDashOffset = -now / 30; sc.beginPath(); sc.arc(game.hint.x, game.hint.y, 150, 0, 7); sc.stroke(); sc.restore();
+  }
+  game.floats = game.floats.filter((f) => now - f.t < 1300);
+  game.floats.forEach((f) => {
+    const k = (now - f.t) / 1300;
+    sc.globalAlpha = 1 - k; sc.font = "20px Bungee, Impact, sans-serif"; sc.textAlign = "center";
+    sc.lineWidth = 5; sc.strokeStyle = "#14213d"; sc.strokeText(f.txt, f.x, f.y - 30 - k * 40);
+    sc.fillStyle = "#ffd23f"; sc.fillText(f.txt, f.x, f.y - 30 - k * 40); sc.globalAlpha = 1;
+  });
+  if (game.state === "found") {
+    const h = game.hero;
+    sc.strokeStyle = "#1b9e5a"; sc.lineWidth = 6; sc.setLineDash([]);
+    sc.beginPath(); sc.arc(h.x, h.y - 28 * h.s, 46 * h.s, 0, 7); sc.stroke();
+  }
+}
+
+function loop() {
+  if (!game) return;
+  if (game.state === "play") {
+    game.elapsed = (performance.now() - game.t0) / 1000 + game.penalty;
+    $("hudTime").textContent = game.elapsed.toFixed(1).replace(".", ",") + "s";
+  }
+  render();
+  requestAnimationFrame(loop);
+}
+
+function renderLevels() {
+  $("levels").innerHTML = LEVELS.map((l, i) =>
+    `<span class="lvl ${i < game.level ? "done" : i === game.level ? "on" : ""}">${i + 1} · ${l.name}</span>`).join("");
+  $("hudPlace").textContent = `Fase ${game.level + 1} · ${LEVELS[game.level].name}`;
+  $("hudMiss").textContent = game.misses;
+}
+
+function showPanel(html) { $("panel").innerHTML = html; $("overlay").hidden = false; }
+function hidePanel() { $("overlay").hidden = true; }
+
+function showIntro() {
+  const lv = LEVELS[game.level];
+  game.state = "intro"; $("hintBtn").disabled = true;
+  $("hudTime").textContent = "0,0s";
+  showPanel(`<div class="eyebrow">Fase ${game.level + 1} de ${LEVELS.length} · ${lv.tag}</div>
+    <h3>${lv.name}</h3><p>${lv.intro}</p>
+    <button class="btn" type="button" id="goBtn">Procurar</button>`);
+  $("goBtn").onclick = startLevel;
+}
+
+function startLevel() {
+  hidePanel(); game.state = "play"; game.t0 = performance.now(); game.penalty = 0; game.elapsed = 0;
+  game.marks = []; game.hint = null; $("hintBtn").disabled = false;
+}
+
+function found() {
+  game.state = "found"; $("hintBtn").disabled = true;
+  game.total += game.elapsed;
+  const lv = LEVELS[game.level];
+  const t = game.elapsed.toFixed(1).replace(".", ",");
+  if (lv.twist) {
+    showPanel(`<div class="eyebrow">Achou em ${t}s… será?</div>
+      <h3>É um papelão!</h3>
+      <p>Alguém deixou um Flávio de papelão no desembarque. O de verdade continua sem paradeiro oficial.</p>
+      <button class="btn" type="button" id="nextBtn">Ver meu resultado</button>`);
+    $("nextBtn").onclick = finish;
+  } else {
+    showPanel(`<div class="eyebrow">Fase ${game.level + 1} concluída · ${t}s</div>
+      <h3>${pick(FOUND_LINES)}</h3>
+      <p>Antes que alguém confirme, ele já mudou de lugar.</p>
+      <button class="btn" type="button" id="nextBtn">Próximo cenário →</button>`);
+    $("nextBtn").onclick = () => { game.level++; buildScene(); renderLevels(); showIntro(); };
+  }
+}
+
+function finish() {
+  game.state = "done";
+  $("levels").querySelectorAll(".lvl").forEach((el) => { el.className = "lvl done"; });
+  $("hudPlace").textContent = "Busca encerrada";
+  const total = Math.round(game.total);
+  let rank = "Assessor que também não sabe onde ele está";
+  if (total < 40) rank = "Faro de perdigueiro";
+  else if (total < 80) rank = "Detetive de aeroporto";
+  else if (total < 150) rank = "Repórter de plantão";
+  $("rank").textContent = rank;
+  $("rTime").textContent = total + "s"; $("rMiss").textContent = game.misses; $("rHint").textContent = game.hints;
+  $("shareText").textContent = `Procurei o Flávio em 4 cenários e levei ${total}s (${game.misses} erros). Nível: ${rank}. Paradeiro oficial: desconhecido. Onde está o Flávio?`;
+  $("results").hidden = false;
+  showPanel(`<div class="eyebrow">Fim da busca</div><h3>Paradeiro: desconhecido</h3>
+    <p>Você chegou mais perto do que os aliados.</p>
+    <button class="btn" type="button" id="againPanel">Jogar de novo</button>`);
+  $("againPanel").onclick = newGame;
+  $("results").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+scene.addEventListener("click", (e) => {
+  if (!game || game.state !== "play") return;
+  const r = scene.getBoundingClientRect();
+  const x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
+  const h = game.hero;
+  const dx = x - h.x, dy = y - (h.y - 30 * h.s);
+  if (Math.abs(dx) < 22 * h.s && Math.abs(dy) < 34 * h.s) { found(); return; }
+  game.misses++; game.penalty += 3; $("hudMiss").textContent = game.misses;
+  game.marks.push({ x, y }); game.floats.push({ x, y, txt: pick(MISS_LINES), t: performance.now() });
+});
+
+$("hintBtn").addEventListener("click", () => {
+  if (game.state !== "play") return;
+  game.penalty += 10; game.hints++;
+  const h = game.hero;
+  game.hint = { x: h.x + between(-80, 80), y: h.y - 30 + between(-70, 70), until: performance.now() + 3500 };
+});
+
+$("heroStart").addEventListener("click", () => { if (game && game.state === "intro") setTimeout(() => $("goBtn") && $("goBtn").focus(), 400); });
+$("againBtn").addEventListener("click", () => { newGame(); $("jogo").scrollIntoView({ behavior: "smooth" }); });
+$("copyBtn").addEventListener("click", () => {
+  const txt = $("shareText").textContent;
+  const done = () => toast("Resultado copiado");
+  try {
+    navigator.clipboard.writeText(txt).then(done, selectShare);
+  } catch (err) { selectShare(); }
+});
+function selectShare() {
+  const range = document.createRange(); range.selectNodeContents($("shareText"));
+  const s = getSelection(); s.removeAllRanges(); s.addRange(range); toast("Texto selecionado. Copie com Ctrl/Cmd+C");
+}
+let toastTimer;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2200); }
+
+/* ---------- cartaz ---------- */
+function drawPoster() {
+  const cv = $("posterCanvas"), c = cv.getContext("2d");
+  c.clearRect(0, 0, 400, 300);
+  drawPerson(c, Object.assign({}, FLAVIO, { x: 200, y: 280, s: 4 }));
+  c.font = "14px 'IBM Plex Mono', monospace"; c.fillStyle = "#d62839"; c.textAlign = "left";
+  c.fillText("VISTO POR ÚLTIMO: ???", 12, 24);
+}
+
+/* ---------- ticker e relógio ---------- */
+const NEWS = ["Passaportes cancelados", "Prazo de 24h venceu", "Jatinho parado em Puerto Iguazú, segundo a Infobae", "Argentina: sem registro de entrada", "Aliados: “Não saiu”", "Flávio nega intenção de fuga", "“Onde está Flávio?” dispara no Google", "Senador segue incomunicável"];
+$("ticker").innerHTML = NEWS.concat(NEWS).map((n) => `<span>${n}</span>`).join("");
+const t0 = Date.now();
+setInterval(() => {
+  const s = Math.floor((Date.now() - t0) / 1000);
+  $("since").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}, 1000);
+
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+  drawPoster(); newGame(); requestAnimationFrame(loop);
+});
+</script>
